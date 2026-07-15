@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+    --color-ui-border: #EAEBED;
+    --color-ui-button: #0CAD69;
+}
