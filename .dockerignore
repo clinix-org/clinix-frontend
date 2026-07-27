@@ -1,0 +1,27 @@
+# Dependências e Builds
+node_modules/
+dist/
+build/
+yarn.lock
+
+# Arquivos Env 
+.env
+.env.local
+.env.development
+.env.production
+
+# Ferramentas
+.git/
+.gitignore
+.husky/
+
+# Configs
+.vscode/
+.idea/
+
+# Docs
+README.md
+LICENSE
+eslint.config.js
+.prettierrc.json
+Dockerfile
