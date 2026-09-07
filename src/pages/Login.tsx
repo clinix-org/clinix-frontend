@@ -14,7 +14,7 @@ const Login = () => {
 
   const schema = z.object({
     username: z.string().min(1, 'Campo obrigatório').email('Email inválido'),
-    password: z.string().min(1, 'Campo obrigatório'),
+    password: z.string().min(6, 'Campo obrigatório'),
   });
 
   const [formState, setFormState] = useState({
