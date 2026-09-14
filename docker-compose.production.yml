@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_APP_ENV=development
+        - VITE_API_URL=http://localhost:8080
+    image: clinix-frontend:latest
+    container_name: clinix-frontend
+    ports:
+      - "80:80"
+    env_file:
+      - .env.local
+    restart: always

@@ -3,13 +3,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - VITE_APP_ENV=development
-        - VITE_API_URL=http://localhost:8080
-    image: clinix-frontend:latest
+      target: development
+    image: clinix-frontend:dev
     container_name: clinix-frontend
     ports:
-      - "80:80"
+      - "127.0.0.1:80:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
     env_file:
       - .env.local
+    environment:
+      VITE_USE_POLLING: "true"
     restart: always

@@ -1,10 +1,17 @@
-# 1 - Build
-FROM node:20-alpine AS builder
+# Dependencias compartilhadas entre desenvolvimento e build
+FROM node:20-alpine AS dependencies
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
 
+# Desenvolvimento com os arquivos locais montados pelo Compose
+FROM dependencies AS development
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173", "--strictPort"]
+
+# 1 - Build
+FROM dependencies AS builder
 COPY . .
 
 ARG VITE_APP_ENV
