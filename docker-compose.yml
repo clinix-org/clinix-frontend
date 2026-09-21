@@ -7,7 +7,7 @@ services:
     image: clinix-frontend:dev
     container_name: clinix-frontend
     ports:
-      - "127.0.0.1:80:5173"
+      - "127.0.0.1:5173:5173"
     volumes:
       - .:/app
       - /app/node_modules
@@ -15,4 +15,17 @@ services:
       - .env.local
     environment:
       VITE_USE_POLLING: "true"
+    restart: always
+
+  frontend-production:
+    profiles: [production]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_APP_ENV: production
+        VITE_API_URL: ${PRODUCTION_API_URL:-/api}
+    image: clinix-frontend:latest
+    ports:
+      - "80:80"
     restart: always
