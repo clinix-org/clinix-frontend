@@ -1,6 +1,6 @@
 import { type ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { Bounce, ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import api from '../api';
 import { DataPageToolbar } from '../components/DataPageToolbar';
 import { PageSurface } from '../components/PageSurface';
@@ -14,6 +14,7 @@ import {
   type UserFormValues,
   type UserStatus,
 } from '../components/userDialogConfig';
+import { SuccessToast } from '../components/SuccessToast';
 
 type User = {
   id: number;
@@ -194,16 +195,6 @@ const updateUser = async (user: User): Promise<User | undefined> => {
   return user;
 };
 
-const deleteUser = async (userId: number) => {
-  if (USERS_API_URL) {
-    await api.delete(`${USERS_API_URL}/${userId}`);
-    return;
-  }
-
-  await waitMockResponse();
-  mockUserStore = mockUserStore.filter(user => user.id !== userId);
-};
-
 const getUserName = (user: User) => user.name || user.nome || '-';
 
 const getUserEmail = (user: User) => user.email || user.usuario || '-';
@@ -331,15 +322,25 @@ export const Usuarios = () => {
           setUsers(currentUsers => [createdUser, ...currentUsers]);
         }
 
-        toast.success('Usuario criado com sucesso.', {
+        toast(SuccessToast, {
+          data: {
+            message: `Usuário ${createdUser?.name || createdUser?.nome || values.nome} criado com sucesso!`,
+          },
           position: 'bottom-right',
           autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
+          hideProgressBar: true,
+          closeButton: false,
+          closeOnClick: false,
           pauseOnHover: true,
-          draggable: true,
-          theme: 'light',
-          transition: Bounce,
+          pauseOnFocusLoss: true,
+          role: 'status',
+          style: {
+            padding: '0 24px 0 0',
+            minHeight: 0,
+            background: 'transparent',
+            boxShadow: 'none',
+            borderRadius: 6,
+          },
         });
       } else if (editingUser) {
         const updatedUser = {
@@ -359,15 +360,25 @@ export const Usuarios = () => {
           ),
         );
 
-        toast.success('Usuario salvo com sucesso.', {
+        toast(SuccessToast, {
+          data: {
+            message: 'Dados alterados com sucesso!',
+          },
           position: 'bottom-right',
           autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
+          hideProgressBar: true,
+          closeButton: false,
+          closeOnClick: false,
           pauseOnHover: true,
-          draggable: true,
-          theme: 'light',
-          transition: Bounce,
+          pauseOnFocusLoss: true,
+          role: 'status',
+          style: {
+            padding: '0 24px 0 0',
+            minHeight: 0,
+            background: 'transparent',
+            boxShadow: 'none',
+            borderRadius: 6,
+          },
         });
       }
 
@@ -393,7 +404,7 @@ export const Usuarios = () => {
 
     try {
       setIsDeleting(true);
-      await deleteUser(userPendingDeletion.id);
+      // A exclusão atual afeta apenas a lista em memória.
 
       const deletedUser = userPendingDeletion;
 
@@ -404,19 +415,26 @@ export const Usuarios = () => {
         currentIds.filter(currentId => currentId !== deletedUser.id),
       );
       setUserPendingDeletion(null);
-      toast.success(
-        `Usuario ${getUserName(deletedUser)} excluido com sucesso.`,
-        {
-          position: 'bottom-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: 'light',
-          transition: Bounce,
+      toast(SuccessToast, {
+        data: {
+          message: `Usuário ${getUserName(deletedUser)} excluído com sucesso.`,
         },
-      );
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeButton: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        pauseOnFocusLoss: true,
+        role: 'status',
+        style: {
+          padding: '0 24px 0 0',
+          minHeight: 0,
+          background: 'transparent',
+          boxShadow: 'none',
+          borderRadius: 6,
+        },
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -694,42 +712,55 @@ export const Usuarios = () => {
           onMouseDown={handleCloseDeleteDialog}
         >
           <div
-            className='w-full max-w-[420px] rounded-lg bg-white p-6 shadow-xl'
+            className='w-full max-w-[440px] overflow-hidden rounded-lg bg-white shadow-xl'
             role='dialog'
             aria-modal='true'
             aria-labelledby='delete-user-dialog-title'
+            aria-describedby='delete-user-dialog-description delete-user-dialog-warning'
             onMouseDown={event => event.stopPropagation()}
           >
             <h2
               id='delete-user-dialog-title'
-              className='text-lg font-semibold text-[#3f464d]'
+              className='border-b border-ui-border px-6 py-3 text-center text-xl font-bold leading-6 text-[#c92337]'
             >
-              Excluir usuario
+              Excluir usuário
             </h2>
-            <p className='mt-3 text-[14px] leading-6 text-[#646b72]'>
-              Tem certeza que deseja excluir o usuario{' '}
-              <strong className='font-semibold text-[#3f464d]'>
-                {getUserName(userPendingDeletion)}
-              </strong>
-              ?
-            </p>
-            <div className='mt-6 flex justify-end gap-3'>
-              <button
-                type='button'
-                onClick={handleCloseDeleteDialog}
-                disabled={isDeleting}
-                className='h-10 rounded-lg border border-[#d7dade] px-4 text-[13px] font-semibold text-[#5f666d] transition-colors hover:bg-[#f6f7f8] disabled:cursor-not-allowed disabled:opacity-70'
+            <div className='px-6 pt-5 pb-6'>
+              <p
+                id='delete-user-dialog-description'
+                className='text-[14px] leading-6 wrap-anywhere text-[#4f5b58]'
               >
-                Nao
-              </button>
-              <button
-                type='button'
-                onClick={handleConfirmDeleteUser}
-                disabled={isDeleting}
-                className='h-10 rounded-lg bg-[#c43b4c] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#9f2f3d] disabled:cursor-not-allowed disabled:opacity-70'
+                Tem certeza que deseja excluir o usuário{' '}
+                <strong className='font-bold'>
+                  {getUserName(userPendingDeletion)}
+                </strong>
+                ?
+              </p>
+              <p
+                id='delete-user-dialog-warning'
+                className='mt-1 text-[14px] leading-6 text-[#d3132c]'
               >
-                {isDeleting ? 'Excluindo...' : 'Sim'}
-              </button>
+                <strong className='font-bold'>Atenção!</strong> Essa ação não
+                poderá ser desfeita.
+              </p>
+              <div className='mt-5 grid grid-cols-2 gap-3 sm:gap-6'>
+                <button
+                  type='button'
+                  onClick={handleCloseDeleteDialog}
+                  disabled={isDeleting}
+                  className='h-11 cursor-pointer rounded-lg border-2 border-[#4f5b58] bg-white px-4 text-[14px] font-medium text-[#4f5b58] transition-colors hover:bg-[#f6f7f8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4f5b58] disabled:cursor-not-allowed disabled:opacity-70'
+                >
+                  Cancelar
+                </button>
+                <button
+                  type='button'
+                  onClick={handleConfirmDeleteUser}
+                  disabled={isDeleting}
+                  className='h-11 cursor-pointer rounded-lg border-2 border-[#d3132c] bg-[#f7e9eb] px-4 text-[14px] font-medium text-[#d3132c] transition-colors hover:bg-[#f2d7dc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d3132c] disabled:cursor-not-allowed disabled:opacity-70'
+                >
+                  {isDeleting ? 'Excluindo...' : 'Excluir'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
