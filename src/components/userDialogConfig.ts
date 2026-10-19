@@ -20,7 +20,7 @@ export type UserDialogSubmitValues = {
 };
 
 export const USER_ACCESS_OPTIONS = [
-  { value: 'USER', label: 'Colaborador' },
+  { value: 'USER', label: 'User' },
   { value: 'ADMIN', label: 'Administrador' },
 ];
 

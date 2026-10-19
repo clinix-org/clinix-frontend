@@ -37,7 +37,6 @@ export const appPages: AppPage[] = [
     label: 'Tela inicial',
     Component: Dashboard,
     menuGroup: 'main',
-    permissions: ['dashboard:read'],
     exactMatch: true,
   },
   {

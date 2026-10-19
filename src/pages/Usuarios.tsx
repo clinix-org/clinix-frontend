@@ -195,6 +195,13 @@ const updateUser = async (user: User): Promise<User | undefined> => {
   return user;
 };
 
+const deleteUser = async (userId: number) => {
+  if (USERS_API_URL) {
+    await api.delete(`${USERS_API_URL}/${userId}`);
+    return;
+  }
+};
+
 const getUserName = (user: User) => user.name || user.nome || '-';
 
 const getUserEmail = (user: User) => user.email || user.usuario || '-';
@@ -404,7 +411,7 @@ export const Usuarios = () => {
 
     try {
       setIsDeleting(true);
-      // A exclusão atual afeta apenas a lista em memória.
+      await deleteUser(userPendingDeletion.id);
 
       const deletedUser = userPendingDeletion;
 

@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
 import { useAuth } from '../context/useAuth';
 
@@ -42,8 +42,6 @@ const TemporaryUnavailable = () => (
 
 export const ProtectedRouter = () => {
   const { status, isAuthenticated } = useAuth();
-  const location = useLocation();
-  const redirectTo = `${location.pathname}${location.search}`;
 
   if (status === 'idle' || status === 'loading') {
     return <SessionLoading />;
@@ -58,7 +56,7 @@ export const ProtectedRouter = () => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to='/login' replace state={{ from: redirectTo }} />;
+    return <Navigate to='/login' replace />;
   }
 
   return <MainLayout />;

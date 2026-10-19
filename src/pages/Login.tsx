@@ -12,7 +12,6 @@ const Login = () => {
   const { login, logout } = useAuth();
   const location = useLocation();
   const state = location.state as {
-    from?: string;
     sessionExpired?: boolean;
   } | null;
 
@@ -56,7 +55,7 @@ const Login = () => {
         formState.password.trim(),
       );
 
-      await login(token, state?.from);
+      await login(token);
     } catch (error: unknown) {
       if (isAxiosError(error) && error.response?.status === 401) {
         setHasInvalidCredentials(true);
