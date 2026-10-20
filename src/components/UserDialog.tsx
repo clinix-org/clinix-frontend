@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from 'react';
-import { ChevronDown, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import {
   USER_ACCESS_OPTIONS,
   getDefaultUserFormValues,
@@ -78,6 +78,28 @@ export const UserDialog = ({
     });
   };
 
+  const handleInputValidation = (event: FormEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+
+    // Reavalia as regras nativas sem manter um erro personalizado anterior.
+    input.setCustomValidity('');
+
+    if (input.validity.valueMissing) {
+      input.setCustomValidity('Preencha este campo');
+    } else if (input.validity.patternMismatch) {
+      // Os campos com pattern neste formulário são as senhas.
+      input.setCustomValidity('A senha deve conter exatamente 6 números.');
+    } else if (input.validity.typeMismatch) {
+      input.setCustomValidity('Informe um e-mail válido.');
+    }
+  };
+
+  const inputValidationProps = {
+    onInvalid: handleInputValidation,
+    onInput: handleInputValidation,
+    onBlur: handleInputValidation,
+  };
+
   return (
     <div
       className='fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4'
@@ -122,9 +144,10 @@ export const UserDialog = ({
               value={values.name}
               onChange={event => handleChange('name', event.target.value)}
               required
-              placeholder='nome.sobrenome'
+              placeholder='Digite o nome completo'
               autoComplete='off'
               className='h-10 w-full rounded-lg border border-[#cfd3d6] px-3 text-[13px] text-[#5f666d] outline-none transition-colors placeholder:text-[#82878c] focus:border-[#0cad69]'
+              {...inputValidationProps}
             />
           </label>
 
@@ -133,14 +156,15 @@ export const UserDialog = ({
               E-mail <span className='text-[#c43b4c]'>*</span>
             </span>
             <input
-              type='text'
+              type='email'
               inputMode='email'
               value={values.email}
               onChange={event => handleChange('email', event.target.value)}
               required
               placeholder='nome.sobrenome@clinix.com'
               className='h-10 w-full rounded-lg border border-[#cfd3d6] px-3 text-[13px] text-[#5f666d] outline-none transition-colors placeholder:text-[#82878c] focus:border-[#0cad69]'
-              autoComplete='new-password'
+              autoComplete='off'
+              {...inputValidationProps}
             />
           </label>
 
@@ -160,9 +184,10 @@ export const UserDialog = ({
                     handlePasswordChange('password', event.target.value)
                   }
                   required
-                  placeholder='******'
+                  placeholder='Digite a senha'
                   className='h-10 w-full rounded-lg border border-[#cfd3d6] px-3 text-[13px] text-[#5f666d] outline-none transition-colors placeholder:text-[#82878c] focus:border-[#0cad69]'
                   autoComplete='new-password'
+                  {...inputValidationProps}
                 />
               </label>
 
@@ -180,9 +205,10 @@ export const UserDialog = ({
                     handlePasswordChange('confirmPassword', event.target.value)
                   }
                   required
-                  placeholder='******'
+                  placeholder='Confirme a senha'
                   autoComplete='new-password'
                   className='h-10 w-full rounded-lg border border-[#cfd3d6] px-3 text-[13px] text-[#5f666d] outline-none transition-colors placeholder:text-[#82878c] focus:border-[#0cad69]'
+                  {...inputValidationProps}
                 />
               </label>
             </>
@@ -256,7 +282,6 @@ export const UserDialog = ({
             disabled={isSaving}
             className='cursor-pointer flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#c43b4c] px-4 text-[13px] font-semibold text-[#c43b4c] transition-colors hover:bg-[#fff2f4] disabled:cursor-not-allowed disabled:opacity-70 sm:min-w-[150px]'
           >
-            <Trash2 className='size-3.5' />
             Cancelar
           </button>
           <button
@@ -264,16 +289,11 @@ export const UserDialog = ({
             disabled={isSaving}
             className='cursor-pointer flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#0cad69] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#0a8c55] disabled:cursor-not-allowed disabled:opacity-70 sm:min-w-[170px]'
           >
-            {mode === 'create' ? (
-              <Plus className='size-4' />
-            ) : (
-              <Pencil className='size-4' />
-            )}
             {isSaving
               ? 'Salvando...'
               : mode === 'create'
                 ? 'Criar novo usuário'
-                : 'Salvar usuário'}
+                : 'Salvar'}
           </button>
         </div>
       </form>

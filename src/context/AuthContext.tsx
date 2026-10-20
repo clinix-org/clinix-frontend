@@ -9,14 +9,6 @@ import {
     type AuthStatus,
 } from "./AuthContextValue";
 
-const getSafeRedirectPath = (value?: unknown) => {
-    if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
-        return "/dashboard";
-    }
-
-    return value;
-};
-
 export const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
     const navigate = useNavigate();
     const [status, setStatus] = React.useState<AuthStatus>("idle");
@@ -88,13 +80,13 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
         return refreshPromiseRef.current;
     }, [clearSession]);
 
-    const login = React.useCallback(async (token: string, redirectTo?: unknown) => {
+    const login = React.useCallback(async (token: string) => {
         authService.clearSession();
         setAuthToken(token);
 
         const currentUser = await refreshSession();
         if (currentUser) {
-            navigate(getSafeRedirectPath(redirectTo), { replace: true });
+            navigate("/dashboard", { replace: true });
         }
     }, [navigate, refreshSession]);
 

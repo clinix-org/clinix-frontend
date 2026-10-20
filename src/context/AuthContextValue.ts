@@ -35,7 +35,7 @@ export interface AuthContextType {
     roles: string[];
     permissions: string[];
     isAuthenticated: boolean;
-    login: (token: string, redirectTo?: unknown) => Promise<void>;
+    login: (token: string) => Promise<void>;
     logout: (reason?: "expired" | "manual") => void;
     refreshSession: () => Promise<AuthenticatedUser | null>;
     hasRole: (role: string) => boolean;

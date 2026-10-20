@@ -19,6 +19,11 @@ A navegação utiliza React Router e a comunicação com a API utiliza Axios.
 Algumas telas ainda utilizam dados demonstrativos ou operações em memória.
 Esses fluxos não representam persistência no backend.
 
+Após um login válido e a validação da sessão, todos os perfis são direcionados
+à tela inicial (`/dashboard`), disponível para qualquer usuário autenticado.
+As demais páginas mantêm os requisitos de perfil e permissões do catálogo,
+inclusive no acesso direto por URL.
+
 Acesse a plataforma [Clinix](https://clinix-saude.vercel.app/).
 
 ---

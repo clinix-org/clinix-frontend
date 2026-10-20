@@ -105,6 +105,9 @@ Prettier declarado no `package.json`.
   `MainLayout` renderiza o componente do catálogo e verifica `canAccess`.
 - Não confunda navegação oculta com autorização: mantenha a proteção das rotas
   e alinhe roles/permissões ao contrato do backend.
+- Após login válido e validação da sessão, direcione sempre para `/dashboard`.
+  Essa página exige autenticação, sem perfil ou permissão adicional; não retome
+  a rota anterior ao login. As demais páginas mantêm seus requisitos de acesso.
 - Diferencie explicitamente mocks de integração real; não apresente operações
   em memória como persistência no backend.
 
