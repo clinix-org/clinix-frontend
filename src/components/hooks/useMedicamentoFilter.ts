@@ -16,8 +16,6 @@ export const useMedicamentoFilter = ({
 }: MedicamentoFilter): void => {
   const dispatch = useDispatch<AppDispatch>();
 
-  console.log("pageNumber: " + pageNumber + ", pageSize: " + pageSize +", nomeComercial: " + nomeComercial)
-
   useEffect(() => {
     const params = new URLSearchParams({
       nomeComercial: nomeComercial.trim(),
