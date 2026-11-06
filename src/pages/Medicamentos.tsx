@@ -19,8 +19,6 @@ export const Medicamentos = () => {
     (state: RootState) => state.medicamento,
   );
 
-  console.log(medicamentos)
-
   useMedicamentoFilter({
     pageNumber: currentPage,
     pageSize: itemsPerPage,
