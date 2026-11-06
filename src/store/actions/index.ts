@@ -43,8 +43,6 @@ export const fetchMedicamentos = (queryString: string): AppThunk => async dispat
       `/medicamentos/nomecomercial?${queryString}`,
     );
 
-      console.log(data);
-
     dispatch({ type: 'FETCH_MEDICAMENTOS', payload: data });
   } catch (error: unknown) {
     const message = isAxiosError<{ message?: string }>(error)
