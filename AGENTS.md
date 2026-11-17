@@ -36,8 +36,8 @@ repositório; há telas com dados demonstrativos ou fluxos mockados.
 
 ## Preparação e comandos de construção
 
-Execute os comandos na raiz do projeto. Use Node compatível com o Vite instalado
-(atualmente `^20.19.0 || >=22.12.0`) e npm. O Dockerfile utiliza `node:20-alpine`.
+Execute os comandos na raiz do projeto. Use Node.js 24 LTS e npm 11 para instalar as dependências.
+O Dockerfile utiliza `node:24-alpine`.
 Use npm e `package-lock.json` como referência para instalação, como no Dockerfile;
 também existe `yarn.lock`, mas não alterne gerenciadores nem regenere ambos sem
 uma tarefa explícita de padronização.

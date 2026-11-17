@@ -34,8 +34,7 @@ Para executar diretamente na máquina:
 
 | Requisito | Como verificar |
 | --- | --- |
-| Node.js compatível com Vite 7: `^20.19.0` ou `>=22.12.0` | `node --version` |
-| npm | `npm --version` |
+| Node.js 24 LTS e npm 11 | `node --version` e `npm --version` |
 | Git | `git --version` |
 | Backend configurado e em execução para os fluxos integrados | Consulte o [README do backend](https://github.com/clinix-org/clinix-backend#readme) |
 

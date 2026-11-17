@@ -1,5 +1,5 @@
 # Dependencias compartilhadas entre desenvolvimento e build
-FROM node:20-alpine AS dependencies
+FROM node:24-alpine AS dependencies
 WORKDIR /app
 
 COPY package*.json ./
