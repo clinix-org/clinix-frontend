@@ -1,31 +1,58 @@
+# Clinix Saúde — Frontend
+#
+#   Desenvolvimento:  docker compose up --build        (http://localhost:5173)
+#   Produção:         docker compose --profile production up -d --build
+name: clinix-saude-frontend
+
 services:
   frontend:
+    container_name: clinix-saude-frontend
+    image: clinix-saude-frontend:dev
     build:
       context: .
       dockerfile: Dockerfile
       target: development
-    image: clinix-frontend:dev
-    container_name: clinix-frontend
     ports:
-      - "127.0.0.1:5173:5173"
+      - "127.0.0.1:${FRONTEND_DEV_PORT:-5173}:5173"
     volumes:
       - .:/app
       - /app/node_modules
     env_file:
-      - .env.local
+      - path: .env.example
+        required: false
+      - path: .env.local
+        required: false
     environment:
       VITE_USE_POLLING: "true"
-    restart: always
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
 
   frontend-production:
     profiles: [production]
+    container_name: clinix-saude-frontend-prod
+    image: clinix-saude-frontend:latest
     build:
       context: .
       dockerfile: Dockerfile
+      target: production
       args:
         VITE_APP_ENV: production
         VITE_API_URL: ${PRODUCTION_API_URL:-/api}
-    image: clinix-frontend:latest
     ports:
-      - "80:80"
-    restart: always
+      - "${FRONTEND_PROD_BIND:-127.0.0.1}:${FRONTEND_PROD_PORT:-8081}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
