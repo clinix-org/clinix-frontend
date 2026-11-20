@@ -210,3 +210,17 @@ configuração concreta quando ela for adotada; este guia não configura CI/CD.
   `docs:`, presentes no histórico, sem presumir validação automática de mensagens.
 - Não faça commit, push ou implantação apenas porque concluiu uma edição;
   execute essas etapas quando fizerem parte do pedido do usuário.
+
+
+## Cadastro de medicamentos
+
+- A API de medicamentos usa `/medications`, campos em inglês e paginação base zero.
+  O estado Redux e os nomes de páginas permanecem conforme a organização existente.
+- As opções de unidade, categoria e apresentação vêm de `GET /medications/options`.
+  Não duplique essas listas no frontend.
+- `MedicationDialog` usa o diálogo nativo para foco, teclado e acessibilidade.
+  O cadastro é exclusivo de ADMIN; o backend valida a permissão novamente.
+- Depois de cadastrar, a busca é limpa e a primeira página mostra os registros
+  mais recentes. A quantidade inicial é zero; estoque não faz parte do formulário.
+- Cada princípio ativo possui nome, dosagem positiva e unidade. Preserve o campo
+  `activeIngredient` como lista e o código `mgc` solicitado para micrograma.

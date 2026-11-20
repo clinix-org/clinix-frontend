@@ -4,6 +4,7 @@ import { Filter, Search } from 'lucide-react';
 type DataPageToolbarProps = {
   searchValue?: string;
   searchPlaceholder: string;
+  searchPlaceholderContent?: ReactNode;
   onSearchChange?: (value: string) => void;
   action?: ReactNode;
   info?: ReactNode;
@@ -15,6 +16,7 @@ type DataPageToolbarProps = {
 export const DataPageToolbar = ({
   searchValue,
   searchPlaceholder,
+  searchPlaceholderContent,
   onSearchChange,
   action,
   info,
@@ -46,13 +48,28 @@ export const DataPageToolbar = ({
       <div className='flex w-full items-center gap-3 md:max-w-[600px]'>
         <label className='flex h-10 flex-1 items-center gap-3 rounded-lg border border-[#eaebed] bg-[#fafafa] px-4 text-[#82878c] transition-colors focus-within:border-[#0cad69]'>
           <Search className='size-4' />
-          <input
-            type='search'
-            value={searchValue}
-            onChange={event => onSearchChange?.(event.target.value)}
-            placeholder={searchPlaceholder}
-            className='w-full bg-transparent text-[13px] text-[#5f666d] outline-none placeholder:text-[#646b72]'
-          />
+          <div className='relative min-w-0 flex-1'>
+            <input
+              type='search'
+              value={searchValue}
+              onChange={event => onSearchChange?.(event.target.value)}
+              placeholder={searchPlaceholder}
+              aria-label={searchPlaceholder}
+              className={`peer block w-full bg-transparent text-[13px] text-[#5f666d] outline-none ${
+                searchPlaceholderContent
+                  ? 'placeholder:text-transparent'
+                  : 'placeholder:text-[#646b72]'
+              }`}
+            />
+            {searchPlaceholderContent && (
+              <span
+                aria-hidden='true'
+                className='pointer-events-none absolute inset-0 hidden truncate text-[13px] text-[#646b72] peer-placeholder-shown:block'
+              >
+                {searchPlaceholderContent}
+              </span>
+            )}
+          </div>
         </label>
 
         <div ref={filterContainerRef} className='relative shrink-0'>

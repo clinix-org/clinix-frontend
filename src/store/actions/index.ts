@@ -1,60 +1,43 @@
-import type { UnknownAction } from '@reduxjs/toolkit';
-import type { ThunkAction } from '@reduxjs/toolkit';
-import { isAxiosError } from 'axios';
+import type { UnknownAction, ThunkAction } from '@reduxjs/toolkit';
+import { isAxiosError, isCancel } from 'axios';
 import api from '../../api';
-import type { RootState } from '../reducers/store.ts';
+import type { RootState } from '../reducers/store';
+import type { Medication } from '../../services/medicationService';
 
-export interface Medicamento {
-  id: number;
-  nomeComercial: string;
-  nomeGenerico: string;
-  quantidade: number;
-  categoria: string;
-  unidadeMedida: string;
-  status: string;
-}
+export type Medicamento = Medication;
 
 interface PaginationResponse<T> {
-  content?: T[];
-  medicamentos?: T[];
+  content: T[];
   pageNumber: number;
   pageSize: number;
   totalElements: number;
   totalPages: number;
   lastPage: boolean;
-  timeStamp?: string;
-  timestamp?: string;
 }
 
 type AppThunk<Return = void> = ThunkAction<
-  Return,
-  RootState,
-  unknown,
-  UnknownAction
+  Return, RootState, unknown, UnknownAction
 >;
 
-export const fetchMedicamentos = (queryString: string): AppThunk => async dispatch => {
+export const fetchMedicamentos = (
+  queryString: string,
+  signal?: AbortSignal,
+): AppThunk => async dispatch => {
   dispatch({ type: 'MEDICAMENTOS_FETCH_START' });
-
-  console.log(queryString);
-
   try {
-    const { data } = await api.get<PaginationResponse<Medicamento>>(
-      `/medicamentos/nomecomercial?${queryString}`,
+    const { data } = await api.get<PaginationResponse<Medication>>(
+      `/medications?${queryString}`, { signal },
     );
-
-    dispatch({ type: 'FETCH_MEDICAMENTOS', payload: data });
+    if (!signal?.aborted) {
+      dispatch({ type: 'FETCH_MEDICAMENTOS', payload: data });
+    }
   } catch (error: unknown) {
+    if (isCancel(error) || signal?.aborted) return;
     const message = isAxiosError<{ message?: string }>(error)
-      ? error.response?.data?.message
-      : undefined;
+      ? error.response?.data?.message : undefined;
     dispatch({
-
       type: 'MEDICAMENTOS_FETCH_ERROR',
-      payload:
-        typeof message === 'string'
-          ? message
-          : 'Não foi possível carregar os medicamentos.',
+      payload: message ?? 'Não foi possível carregar os medicamentos.',
     });
   }
 };
