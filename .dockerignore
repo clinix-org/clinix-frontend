@@ -3,12 +3,15 @@ node_modules/
 dist/
 build/
 yarn.lock
+coverage
 
 # Arquivos Env 
 .env
+.env.*
 .env.local
 .env.development
 .env.production
+!.env.example
 
 # Ferramentas
 .git/
@@ -18,6 +21,7 @@ yarn.lock
 # Configs
 .vscode/
 .idea/
+*.md
 
 # Docs
 README.md
@@ -25,3 +29,4 @@ LICENSE
 eslint.config.js
 .prettierrc.json
 Dockerfile
+docker-compose*.yml
