@@ -34,6 +34,14 @@ export interface MedicationOptions {
 }
 
 export const medicationService = {
+  // The existing list orders creation dates ascending. Fetch the current total
+  // after saving, instead of calculating from a possibly filtered/stale list.
+  async getLastPageNumber(pageSize: number): Promise<number> {
+    const { data } = await api.get<{ totalPages: number }>('/medications', {
+      params: { pageNumber: 0, pageSize },
+    });
+    return Math.max(1, data.totalPages);
+  },
   async getOptions(signal?: AbortSignal): Promise<MedicationOptions> {
     const { data } = await api.get<MedicationOptions>('/medications/options', {
       signal,

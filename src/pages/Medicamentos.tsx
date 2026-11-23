@@ -66,8 +66,9 @@ export const Medicamentos = () => {
   };
 
   return (
-    <PageSurface>
+    <PageSurface testId='medications-page'>
       <DataPageToolbar
+        testIdPrefix='medications'
         searchValue={searchTerm}
         onSearchChange={value => {
           setSearchTerm(value);
@@ -83,12 +84,13 @@ export const Medicamentos = () => {
           hasRole('ADMIN') ? (
             <button
               type='button'
+              data-testid='medications-create-button'
               onClick={() => setIsCreateOpen(true)}
               disabled={!options}
               className='flex h-10 items-center gap-2 rounded-lg bg-[#0cad69] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#0a8c55] disabled:opacity-50'
             >
               <Plus className='size-4' />
-              Novo medicamento
+              Novo Medicamento
             </button>
           ) : undefined
         }
@@ -97,12 +99,14 @@ export const Medicamentos = () => {
       {optionsError && (
         <div
           role='alert'
+          data-testid='medications-options-error'
           className='flex items-center gap-3 px-6 py-3 text-sm text-red-700'
         >
           {optionsError}
           <button
             type='button'
             className='underline'
+            data-testid='medications-options-retry-button'
             onClick={() => setOptionsRetry(value => value + 1)}
           >
             Tentar novamente
@@ -110,40 +114,45 @@ export const Medicamentos = () => {
         </div>
       )}
       <div className='min-h-0 flex-1 overflow-x-auto'>
-        <table className='w-full min-w-[900px] text-left text-[13px]'>
-          <thead className='border-y border-[#eaebed] bg-white text-[12px] font-semibold text-[#5f666d]'>
+        <table
+          data-testid='medications-table'
+          data-state={isLoading ? 'loading' : error ? 'error' : medicamentos.length ? 'ready' : 'empty'}
+          className='w-full min-w-[900px] text-left text-[13px]'>
+          <thead data-testid='medications-table-head' className='border-y border-[#eaebed] bg-white text-[12px] font-semibold text-[#5f666d]'>
             <tr>
-              <th className='px-6 py-4'>Medicamento</th>
-              <th className='px-5 py-4'>Categoria</th>
-              <th className='px-5 py-4'>Dosagem / Unidade</th>
-              <th className='px-5 py-4'>Quantidade</th>
-              <th className='px-5 py-4'>Status</th>
+              <th data-testid='medications-column-name' className='px-6 py-4'>Medicamento</th>
+              <th data-testid='medications-column-category' className='px-5 py-4'>Categoria</th>
+              <th data-testid='medications-column-dosage' className='px-5 py-4'>Dosagem / Unidade</th>
+              <th data-testid='medications-column-quantity' className='px-5 py-4'>Quantidade</th>
+              <th data-testid='medications-column-status' className='px-5 py-4'>Status</th>
             </tr>
           </thead>
-          <tbody className='divide-y divide-[#eaebed]'>
+          <tbody data-testid='medications-table-body' className='divide-y divide-[#eaebed]'>
             {!isLoading &&
               !error &&
               medicamentos.map(medicamento => (
                 <tr
                   key={medicamento.id}
+                  data-testid={`medications-row-${medicamento.id}`}
+                  data-medication-id={medicamento.id}
                   className='h-[58px] text-[#646b72] transition-colors hover:bg-[#fafafa]'
                 >
                   <td className='px-6 py-3 font-medium text-[#646b72]'>
-                    <span>{medicamento.medicationName}</span>
-                    <span className='mt-1 block text-xs font-normal text-[#82878c]'>
+                    <span data-testid='medications-cell-name'>{medicamento.medicationName}</span>
+                    <span data-testid='medications-cell-composition' className='mt-1 block text-xs font-normal text-[#82878c]'>
                       {medicamento.activeIngredient
                         .map(item => item.name)
                         .join(' + ')}
                     </span>
                   </td>
-                  <td className='px-5 py-3'>
+                  <td data-testid='medications-cell-category' className='px-5 py-3'>
                     <OutlinePill>
                       {options?.categories.find(
                         item => item.value === medicamento.category,
                       )?.label ?? medicamento.category}
                     </OutlinePill>
                   </td>
-                  <td className='px-5 py-3'>
+                  <td data-testid='medications-cell-dosage' className='px-5 py-3'>
                     {medicamento.activeIngredient
                       .map(
                         item =>
@@ -151,8 +160,8 @@ export const Medicamentos = () => {
                       )
                       .join(' + ')}
                   </td>
-                  <td className='px-5 py-3'>{medicamento.quantity}</td>
-                  <td className='px-5 py-3'>
+                  <td data-testid='medications-cell-quantity' className='px-5 py-3'>{medicamento.quantity}</td>
+                  <td data-testid='medications-cell-status' className='px-5 py-3'>
                     <StatusPill
                       tone={
                         medicamento.status === 'AVAILABLE'
@@ -175,14 +184,14 @@ export const Medicamentos = () => {
                   className='px-5 py-10 text-center text-[#82878c]'
                   colSpan={5}
                 >
-                  Carregando medicamentos...
+                  <span data-testid='medications-loading'>Carregando medicamentos...</span>
                 </td>
               </tr>
             )}
             {!isLoading && error && (
               <tr>
                 <td className='px-5 py-10 text-center text-red-600' colSpan={5}>
-                  {error}
+                  <span data-testid='medications-list-error'>{error}</span>
                 </td>
               </tr>
             )}
@@ -192,7 +201,7 @@ export const Medicamentos = () => {
                   className='px-5 py-10 text-center text-[#82878c]'
                   colSpan={5}
                 >
-                  Nenhum medicamento encontrado.
+                  <span data-testid='medications-empty-state'>Nenhum medicamento encontrado.</span>
                 </td>
               </tr>
             )}
@@ -201,6 +210,7 @@ export const Medicamentos = () => {
       </div>
 
       <PaginationBar
+        testIdPrefix='medications'
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
@@ -217,13 +227,14 @@ export const Medicamentos = () => {
         <MedicationDialog
           options={options}
           onClose={() => setIsCreateOpen(false)}
-          onCreated={() => {
+          onCreated={async () => {
             setIsCreateOpen(false);
             setSearchTerm('');
-            setCurrentPage(1);
-            setRefreshKey(value => value + 1);
             toast(SuccessToast, {
-              data: { message: 'Medicamento cadastrado com sucesso!' },
+              data: {
+                message: 'Medicamento cadastrado com sucesso!',
+                testId: 'medications-success-toast',
+              },
               position: 'bottom-right',
               autoClose: 5000,
               hideProgressBar: true,
@@ -240,6 +251,19 @@ export const Medicamentos = () => {
                 borderRadius: 6,
               },
             });
+            try {
+              const lastPage = await medicationService.getLastPageNumber(itemsPerPage);
+              setCurrentPage(lastPage);
+            } catch {
+              setCurrentPage(1);
+              toast.warn(
+                <span data-testid='medications-page-location-warning'>
+                  Medicamento cadastrado, mas não foi possível localizar a página. Atualize a listagem.
+                </span>,
+              );
+            } finally {
+              setRefreshKey(value => value + 1);
+            }
           }}
         />
       )}

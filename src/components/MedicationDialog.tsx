@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { isAxiosError } from 'axios';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
+import { parseMedicationDosage } from '../utils/medicationDosage';
 import {
   medicationService,
   type MedicationOptions,
@@ -36,12 +37,14 @@ const labelClass = 'flex flex-col gap-2 text-sm font-bold text-black';
 
 function OptionSelect({
   id,
+  testId,
   label,
   options,
   value,
   onChange,
 }: {
   id: string;
+  testId: string;
   label: string;
   options: MedicationOption[];
   value: string;
@@ -59,16 +62,21 @@ function OptionSelect({
         />
         <select
           id={id}
+          data-testid={testId}
           required
           value={value}
           onChange={event => onChange(event.target.value)}
           className={`${fieldClass} appearance-none border-transparent bg-[#48524e0d] pl-10 pr-3 text-[#48524e]`}
         >
-          <option value='' disabled>
+          <option value='' disabled data-testid={`${testId}-placeholder`}>
             Selecione
           </option>
           {options.map(option => (
-            <option key={option.value} value={option.value}>
+            <option
+              key={option.value}
+              value={option.value}
+              data-testid={`${testId}-option-${option.value}`}
+            >
               {option.label}
             </option>
           ))}
@@ -137,6 +145,13 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
       setError('Informe cada princípio ativo apenas uma vez.');
       return;
     }
+    let dosages: number[];
+    try {
+      dosages = ingredients.map(row => parseMedicationDosage(row.dosage));
+    } catch (failure: unknown) {
+      setError(failure instanceof Error ? failure.message : 'Dosagem inválida.');
+      return;
+    }
     savingRef.current = true;
     setIsSaving(true);
     setError('');
@@ -146,9 +161,9 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
         manufacturer: manufacturer.trim(),
         category,
         presentationFormat,
-        activeIngredient: ingredients.map(row => ({
+        activeIngredient: ingredients.map((row, index) => ({
           name: row.name.trim(),
-          dosage: Number(row.dosage),
+          dosage: dosages[index],
           unitMeasurement: row.unitMeasurement,
         })),
       });
@@ -180,6 +195,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
   return (
     <dialog
       ref={dialogRef}
+      data-testid='medications-create-dialog'
       aria-labelledby='medication-dialog-title'
       className='fixed inset-0 m-auto max-h-[calc(100dvh_-_32px)] w-[calc(100%_-_32px)] max-w-[890px] overflow-y-auto rounded-lg bg-white p-0 text-[#001820] backdrop:bg-black/40'
       onCancel={event => {
@@ -189,13 +205,21 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
     >
       <h2
         id='medication-dialog-title'
+        data-testid='medications-dialog-title'
         className='border-b-2 border-ui-border px-6 py-3 text-center text-xl font-bold'
       >
         Novo medicamento
       </h2>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-6 p-6'>
+      <form
+        onSubmit={handleSubmit}
+        data-testid='medications-create-form'
+        data-state={isSaving ? 'saving' : 'idle'}
+        data-ingredient-count={ingredients.length}
+        className='flex flex-col gap-6 p-6'
+      >
         <fieldset
           disabled={isSaving}
+          data-testid='medications-create-fields'
           className='flex min-w-0 flex-col gap-6 disabled:opacity-70'
         >
           <label htmlFor='medication-name' className={labelClass}>
@@ -204,6 +228,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
             </span>
             <input
               id='medication-name'
+              data-testid='medications-name-input'
               autoFocus
               required
               maxLength={200}
@@ -216,6 +241,8 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
           {ingredients.map((row, index) => (
             <div
               key={row.id}
+              data-testid='medications-ingredient-row'
+              data-ingredient-key={row.id}
               className='grid items-end gap-3 rounded-lg max-sm:border max-sm:border-ui-border max-sm:p-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_46px]'
             >
               <label htmlFor={`name-${row.id}`} className={labelClass}>
@@ -229,6 +256,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
                 </span>
                 <input
                   id={`name-${row.id}`}
+                  data-testid='medications-ingredient-name-input'
                   required
                   maxLength={200}
                   value={row.name}
@@ -245,6 +273,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
                 </span>
                 <input
                   id={`dosage-${row.id}`}
+                  data-testid='medications-ingredient-dosage-input'
                   type='number'
                   inputMode='decimal'
                   required
@@ -261,6 +290,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
               </label>
               <OptionSelect
                 id={`unit-${row.id}`}
+                testId='medications-ingredient-unit-select'
                 label='Unidade de medida'
                 options={options.units}
                 value={row.unitMeasurement}
@@ -275,6 +305,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
                   disabled={ingredients.length >= 30}
                   onClick={addIngredient}
                   aria-label='Adicionar princípio ativo'
+                  data-testid='medications-add-ingredient-button'
                   className='h-[46px] w-[46px] bg-[#48524e0d] p-3'
                 >
                   <Plus aria-hidden='true' className='size-5' />
@@ -284,6 +315,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
                   type='button'
                   variant='destructive'
                   aria-label={`Remover princípio ativo ${index + 1}`}
+                  data-testid='medications-remove-ingredient-button'
                   onClick={() =>
                     setIngredients(rows =>
                       rows.filter(item => item.id !== row.id),
@@ -299,6 +331,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
           <div className='grid gap-6 sm:grid-cols-2'>
             <OptionSelect
               id='medication-category'
+              testId='medications-category-select'
               label='Categoria'
               options={options.categories}
               value={category}
@@ -306,6 +339,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
             />
             <OptionSelect
               id='medication-presentation'
+              testId='medications-presentation-select'
               label='Forma de apresentação'
               options={options.presentationFormats}
               value={presentationFormat}
@@ -319,6 +353,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
             </span>
             <input
               id='medication-manufacturer'
+              data-testid='medications-manufacturer-input'
               required
               maxLength={200}
               value={manufacturer}
@@ -331,6 +366,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
         {error && (
           <p
             role='alert'
+            data-testid='medications-create-error'
             className='rounded-lg bg-red-50 p-3 text-sm text-[#b22936]'
           >
             {error}
@@ -342,12 +378,14 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
             variant='outline'
             disabled={isSaving}
             onClick={onClose}
+            data-testid='medications-cancel-button'
             className='min-h-[46px] border-2 border-[#b22936] text-[#b22936]'
           >
             Cancelar
           </Button>
           <Button
             type='submit'
+            data-testid='medications-submit-button'
             disabled={isSaving}
             className='min-h-[46px] border-2 border-ui-button bg-ui-button text-white hover:bg-[#0a8c55]'
           >

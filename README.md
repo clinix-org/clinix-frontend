@@ -185,7 +185,7 @@ npm run build:production
 ```
 
 Os builds verificam os tipos TypeScript e geram o bundle em `dist/`. Não há
-script `test` ou suíte automatizada no projeto atualmente. Valide também os
+script geral `test`; a dosagem de medicamentos possui a suíte `npm run test:medications`. Valide também os
 fluxos afetados no navegador, incluindo login, permissões e comunicação com a
 API. O hook de pre-commit executa `npm run lint`.
 
@@ -315,3 +315,26 @@ Encontrou um problema, identificou um bug ou tem alguma dúvida relacionada ao
 > Ao abrir uma Issue, descreva os passos para reproduzir o problema, o resultado
 > esperado e o ambiente utilizado. Não inclua senhas, tokens ou dados
 > pessoais/clínicos.
+
+
+## Testes da dosagem de medicamentos
+
+Execute `npm run test:medications` com Node.js 24. A suíte usa `node:test` e
+verifica dosagens positivas, limites, valores inválidos e perda de precisão.
+O formulário bloqueia o envio quando o número JSON seria diferente do decimal
+digitado, mantendo o contrato da API. Use escrita decimal comum, como `0.25`.
+
+
+Após cadastrar um medicamento, a busca é limpa e o frontend consulta a quantidade
+atual de páginas para abrir a última página da ordenação existente por criação
+crescente. A consulta evita usar uma contagem antiga ou limitada pela busca.
+Se essa consulta falhar, o cadastro continua confirmado e a tela informa que a
+listagem precisa ser atualizada. A busca, os filtros e a ordenação não são alterados.
+
+
+## Seletores para automação de QA
+
+O módulo de medicamentos expõe atributos `data-testid` com prefixo `medications-`.
+Consulte o [catálogo de Test IDs](docs/medications-test-ids.md) para os seletores,
+identificação das linhas dinâmicas e exemplos em Cypress, Playwright, Selenium
+e Robot Framework. Os atributos ficam disponíveis também no build de produção.

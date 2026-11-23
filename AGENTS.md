@@ -61,8 +61,8 @@ uma tarefa explícita de padronização.
 | `docker compose up --build -d frontend-production` | Build com Nginx na porta 80; exige API/proxy de produção configurado |
 
 O hook `.husky/pre-commit` executa `npm run lint`. Não o desative para contornar
-falhas. Não há script `test`, suíte automatizada ou workflow de CI versionado
-atualmente. Existe configuração Prettier, mas não há script de formatação nem
+falhas. Não há script geral `test` nem workflow de CI versionado atualmente. A validação
+numérica de medicamentos possui a suíte `npm run test:medications`. Existe configuração Prettier, mas não há script de formatação nem
 Prettier declarado no `package.json`.
 
 ## Ambientes e integração com API
@@ -220,7 +220,30 @@ configuração concreta quando ela for adotada; este guia não configura CI/CD.
   Não duplique essas listas no frontend.
 - `MedicationDialog` usa o diálogo nativo para foco, teclado e acessibilidade.
   O cadastro é exclusivo de ADMIN; o backend valida a permissão novamente.
-- Depois de cadastrar, a busca é limpa e a primeira página mostra os registros
-  mais recentes. A quantidade inicial é zero; estoque não faz parte do formulário.
+- Depois de cadastrar, a busca é limpa e a navegação abre a última página da
+  ordenação atual por criação crescente, para mostrar o novo registro. A quantidade inicial é zero; estoque não faz parte do formulário.
 - Cada princípio ativo possui nome, dosagem positiva e unidade. Preserve o campo
   `activeIngredient` como lista e o código `mgc` solicitado para micrograma.
+
+
+## Validação da dosagem de medicamentos
+
+- `parseMedicationDosage` valida os limites e bloqueia conversões que alterem o
+  decimal digitado. Mantenha `dosage` numérico no JSON e não arredonde silenciosamente.
+- Execute `npm run test:medications` ao alterar esse fluxo. Usa o testador nativo
+  do Node.js 24, sem novas dependências; os casos ficam em `tests/`.
+- Os testes numéricos não substituem a validação do formulário no navegador.
+
+
+## Seletores de automação de medicamentos
+
+- Use `data-testid` com prefixo `medications-`. O catálogo público para QA fica
+  em `docs/medications-test-ids.md`; atualize-o quando adicionar/renomear seletores.
+- Em componentes compartilhados, os atributos são opcionais e só são ativados
+  pelo módulo de medicamentos. Preserve as demais telas.
+- Linhas persistidas usam o ID do backend. Linhas da composição usam o mesmo
+  Test ID de coleção e `data-ingredient-key` imutável durante a sessão do modal.
+  Nunca use nome traduzido, classe CSS ou índice removível como identidade.
+- Campos e opções repetidos devem ser consultados dentro da linha correspondente.
+  Os UUIDs de `data-ingredient-key` são capturados em execução, nunca fixados no teste.
+- Seletores não substituem autorização, labels ou atributos de acessibilidade.
