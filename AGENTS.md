@@ -36,8 +36,8 @@ repositório; há telas com dados demonstrativos ou fluxos mockados.
 
 ## Preparação e comandos de construção
 
-Execute os comandos na raiz do projeto. Use Node.js 24 LTS e npm 11 para instalar as dependências.
-O Dockerfile utiliza `node:24-alpine`.
+Execute os comandos na raiz do projeto. Use Node.js 26 e npm 11 para instalar as dependências.
+O Dockerfile utiliza `node:26-alpine`.
 Use npm e `package-lock.json` como referência para instalação, como no Dockerfile;
 também existe `yarn.lock`, mas não alterne gerenciadores nem regenere ambos sem
 uma tarefa explícita de padronização.
@@ -58,7 +58,7 @@ uma tarefa explícita de padronização.
 | `npm run build` ou `npm run build:production` | `tsc -b` e bundle de produção em `dist/` |
 | `npm run preview` | Inspeção local do último bundle gerado |
 | `docker compose up --build -d` | Desenvolvimento em container, acessível em `http://localhost:5173` |
-| `docker compose up --build -d frontend-production` | Build com Nginx na porta 80; exige API/proxy de produção configurado |
+| `docker compose up --build -d frontend-production` | Build com Nginx na porta interna 8080 (localhost:8081 no Compose); exige API/proxy de produção configurado |
 
 O hook `.husky/pre-commit` executa `npm run lint`. Não o desative para contornar
 falhas. Não há script geral `test` nem workflow de CI versionado atualmente. A validação
@@ -160,7 +160,7 @@ diferencie falhas preexistentes de regressões da mudança.
 ## Etapas de implantação
 
 O artefato publicável é `dist/`. O Dockerfile gera esse diretório no estágio
-`builder` e o serve com Nginx na porta 80. `npm run preview` serve para inspeção
+`builder` e o serve com Nginx na porta interna 8080 (localhost:8081 no Compose). `npm run preview` serve para inspeção
 local, não é o procedimento de hospedagem de produção.
 
 1. Execute os checks de código e defina `VITE_APP_ENV=production` e a base
@@ -168,8 +168,8 @@ local, não é o procedimento de hospedagem de produção.
    os arquivos de ambiente de desenvolvimento/produção são excluídos do contexto
    pela configuração atual do `.dockerignore`.
 2. Prepare proxy e HTTPS na infraestrutura. `nginx.conf` já faz fallback para
-   `index.html` nas rotas da SPA, mas não possui proxy para `/api`. Se escolher
-   `/api`, configure seu encaminhamento ao backend antes de publicar.
+   `index.html` nas rotas da SPA, e encaminha `/api/` para `http://clinix-saude-backend:8080`, preservando o caminho.
+   Garanta uma rede Docker compartilhada e um backend compatível com esse prefixo.
 3. Gere a imagem, por exemplo, quando o proxy `/api` estiver preparado:
 
    ```sh
@@ -186,7 +186,7 @@ local, não é o procedimento de hospedagem de produção.
 
 O `docker-compose.yml` centraliza desenvolvimento e produção. `frontend` mantém
 o comportamento padrão com Vite em `127.0.0.1:5173`. `frontend-production` usa
-o profile `production`, Nginx na porta 80 e build com `VITE_APP_ENV=production`.
+o profile `production`, Nginx na porta interna 8080 (localhost:8081 no Compose) e build com `VITE_APP_ENV=production`.
 Selecione esse serviço explicitamente com
 `docker compose up --build -d frontend-production`; ativar apenas o profile sem
 selecionar serviço também inclui desenvolvimento. O arquivo
@@ -231,7 +231,7 @@ configuração concreta quando ela for adotada; este guia não configura CI/CD.
 - `parseMedicationDosage` valida os limites e bloqueia conversões que alterem o
   decimal digitado. Mantenha `dosage` numérico no JSON e não arredonde silenciosamente.
 - Execute `npm run test:medications` ao alterar esse fluxo. Usa o testador nativo
-  do Node.js 24, sem novas dependências; os casos ficam em `tests/`.
+  do Node.js 26, sem novas dependências; os casos ficam em `tests/`.
 - Os testes numéricos não substituem a validação do formulário no navegador.
 
 

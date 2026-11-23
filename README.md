@@ -36,7 +36,7 @@ Para executar diretamente na máquina:
 
 | Requisito                                                   | Como verificar                                                                      |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Node.js 24 LTS e npm 11                                     | `node --version` e `npm --version`                                                  |
+| Node.js 26 e npm 11                                     | `node --version` e `npm --version`                                                  |
 | Git                                                         | `git --version`                                                                     |
 | Backend configurado e em execução para os fluxos integrados | Consulte o [README do backend](https://github.com/clinix-org/clinix-backend#readme) |
 
@@ -198,7 +198,7 @@ npm run preview
 ### Publicação
 
 O artefato publicável é `dist/`. O Dockerfile também gera esse bundle e o serve
-com Nginx na porta 80, com fallback para `index.html` nas rotas da SPA. O
+com Nginx na porta interna 8080 (localhost:8081 no Compose), com fallback para `index.html` nas rotas da SPA. O
 comando `npm run preview` serve apenas para inspeção local.
 
 Defina `VITE_APP_ENV=production` e a base pública da API durante o build. Use
@@ -216,7 +216,7 @@ build.
 
 O `docker-compose.yml` centraliza os dois serviços. O comando padrão continua
 iniciando apenas `frontend`, com Vite na porta 5173. Para construir e iniciar
-somente o serviço Nginx na porta 80, use:
+somente o serviço Nginx na porta interna 8080 (localhost:8081 no Compose), use:
 
 ```bash
 docker compose up --build -d frontend-production
@@ -230,8 +230,8 @@ desenvolvimento.
 O build desse serviço fixa `VITE_APP_ENV=production`. Defina
 `PRODUCTION_API_URL` no ambiente do terminal ou em um arquivo passado com
 `docker compose --env-file`. Use a URL HTTPS real da API; o padrão `/api` exige
-proxy configurado na infraestrutura, pois o Nginx deste projeto não encaminha
-esse caminho. O serviço de produção não utiliza `.env.local` nem monta o
+o proxy incluído no Nginx para `http://clinix-saude-backend:8080`.
+O caminho `/api/` é preservado: configure a rede compartilhada e o backend para esse prefixo. O serviço de produção não utiliza `.env.local` nem monta o
 código-fonte. Alterações em `PRODUCTION_API_URL` exigem executar o comando de
 build novamente.
 
@@ -319,7 +319,7 @@ Encontrou um problema, identificou um bug ou tem alguma dúvida relacionada ao
 
 ## Testes da dosagem de medicamentos
 
-Execute `npm run test:medications` com Node.js 24. A suíte usa `node:test` e
+Execute `npm run test:medications` com Node.js 26. A suíte usa `node:test` e
 verifica dosagens positivas, limites, valores inválidos e perda de precisão.
 O formulário bloqueia o envio quando o número JSON seria diferente do decimal
 digitado, mantendo o contrato da API. Use escrita decimal comum, como `0.25`.
