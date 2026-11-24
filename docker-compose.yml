@@ -41,6 +41,8 @@ services:
         VITE_API_URL: ${PRODUCTION_API_URL:-/api}
     ports:
       - "${FRONTEND_PROD_BIND:-127.0.0.1}:${FRONTEND_PROD_PORT:-8081}:8080"
+    networks:
+      - clinix-saude
     read_only: true
     tmpfs:
       - /tmp
@@ -56,3 +58,9 @@ services:
         max-size: "10m"
         max-file: "3"
     restart: unless-stopped
+
+networks:
+  # Criada pelo Compose do clinix-backend, que deve subir primeiro.
+  clinix-saude:
+    name: clinix-saude-network
+    external: true
