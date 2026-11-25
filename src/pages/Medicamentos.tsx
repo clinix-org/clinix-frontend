@@ -116,18 +116,49 @@ export const Medicamentos = () => {
       <div className='min-h-0 flex-1 overflow-x-auto'>
         <table
           data-testid='medications-table'
-          data-state={isLoading ? 'loading' : error ? 'error' : medicamentos.length ? 'ready' : 'empty'}
-          className='w-full min-w-[900px] text-left text-[13px]'>
-          <thead data-testid='medications-table-head' className='border-y border-[#eaebed] bg-white text-[12px] font-semibold text-[#5f666d]'>
+          data-state={
+            isLoading
+              ? 'loading'
+              : error
+                ? 'error'
+                : medicamentos.length
+                  ? 'ready'
+                  : 'empty'
+          }
+          className='w-full min-w-[900px] text-left text-[13px]'
+        >
+          <thead
+            data-testid='medications-table-head'
+            className='border-y border-[#eaebed] bg-white text-[12px] font-semibold text-[#5f666d]'
+          >
             <tr>
-              <th data-testid='medications-column-name' className='px-6 py-4'>Medicamento</th>
-              <th data-testid='medications-column-category' className='px-5 py-4'>Categoria</th>
-              <th data-testid='medications-column-dosage' className='px-5 py-4'>Dosagem / Unidade</th>
-              <th data-testid='medications-column-quantity' className='px-5 py-4'>Quantidade</th>
-              <th data-testid='medications-column-status' className='px-5 py-4'>Status</th>
+              <th data-testid='medications-column-name' className='px-6 py-4'>
+                Medicamento
+              </th>
+              <th
+                data-testid='medications-column-category'
+                className='px-5 py-4'
+              >
+                Categoria
+              </th>
+              <th data-testid='medications-column-dosage' className='px-5 py-4'>
+                Dosagem / Unidade
+              </th>
+              <th
+                data-testid='medications-column-quantity'
+                className='px-5 py-4'
+              >
+                Quantidade
+              </th>
+              <th data-testid='medications-column-status' className='px-5 py-4'>
+                Status
+              </th>
             </tr>
           </thead>
-          <tbody data-testid='medications-table-body' className='divide-y divide-[#eaebed]'>
+          <tbody
+            data-testid='medications-table-body'
+            className='divide-y divide-[#eaebed]'
+          >
             {!isLoading &&
               !error &&
               medicamentos.map(medicamento => (
@@ -138,21 +169,32 @@ export const Medicamentos = () => {
                   className='h-[58px] text-[#646b72] transition-colors hover:bg-[#fafafa]'
                 >
                   <td className='px-6 py-3 font-medium text-[#646b72]'>
-                    <span data-testid='medications-cell-name'>{medicamento.medicationName}</span>
-                    <span data-testid='medications-cell-composition' className='mt-1 block text-xs font-normal text-[#82878c]'>
+                    <span data-testid='medications-cell-name'>
+                      {medicamento.medicationName}
+                    </span>
+                    <span
+                      data-testid='medications-cell-composition'
+                      className='mt-1 block text-xs font-normal text-[#82878c]'
+                    >
                       {medicamento.activeIngredient
                         .map(item => item.name)
                         .join(' + ')}
                     </span>
                   </td>
-                  <td data-testid='medications-cell-category' className='px-5 py-3'>
+                  <td
+                    data-testid='medications-cell-category'
+                    className='px-5 py-3'
+                  >
                     <OutlinePill>
                       {options?.categories.find(
                         item => item.value === medicamento.category,
                       )?.label ?? medicamento.category}
                     </OutlinePill>
                   </td>
-                  <td data-testid='medications-cell-dosage' className='px-5 py-3'>
+                  <td
+                    data-testid='medications-cell-dosage'
+                    className='px-5 py-3'
+                  >
                     {medicamento.activeIngredient
                       .map(
                         item =>
@@ -160,8 +202,16 @@ export const Medicamentos = () => {
                       )
                       .join(' + ')}
                   </td>
-                  <td data-testid='medications-cell-quantity' className='px-5 py-3'>{medicamento.quantity}</td>
-                  <td data-testid='medications-cell-status' className='px-5 py-3'>
+                  <td
+                    data-testid='medications-cell-quantity'
+                    className='px-5 py-3'
+                  >
+                    {medicamento.quantity}
+                  </td>
+                  <td
+                    data-testid='medications-cell-status'
+                    className='px-5 py-3'
+                  >
                     <StatusPill
                       tone={
                         medicamento.status === 'AVAILABLE'
@@ -184,7 +234,9 @@ export const Medicamentos = () => {
                   className='px-5 py-10 text-center text-[#82878c]'
                   colSpan={5}
                 >
-                  <span data-testid='medications-loading'>Carregando medicamentos...</span>
+                  <span data-testid='medications-loading'>
+                    Carregando medicamentos...
+                  </span>
                 </td>
               </tr>
             )}
@@ -201,7 +253,9 @@ export const Medicamentos = () => {
                   className='px-5 py-10 text-center text-[#82878c]'
                   colSpan={5}
                 >
-                  <span data-testid='medications-empty-state'>Nenhum medicamento encontrado.</span>
+                  <span data-testid='medications-empty-state'>
+                    Nenhum medicamento encontrado.
+                  </span>
                 </td>
               </tr>
             )}
@@ -228,9 +282,10 @@ export const Medicamentos = () => {
           options={options}
           onClose={() => setIsCreateOpen(false)}
           onCreated={async medication => {
-            const presentation = options.presentationFormats.find(
-              option => option.value === medication.presentationFormat,
-            )?.label ?? medication.presentationFormat;
+            const presentation =
+              options.presentationFormats.find(
+                option => option.value === medication.presentationFormat,
+              )?.label ?? medication.presentationFormat;
             const dosage = medication.activeIngredient
               .map(
                 ingredient =>
@@ -245,7 +300,8 @@ export const Medicamentos = () => {
                   <>
                     Medicamento{' '}
                     <strong>
-                      {medication.medicationName} ({presentation.toLocaleLowerCase('pt-BR')}, {dosage})
+                      {medication.medicationName} (
+                      {presentation.toLocaleLowerCase('pt-BR')}, {dosage})
                     </strong>{' '}
                     cadastrado com sucesso.
                   </>
@@ -270,13 +326,15 @@ export const Medicamentos = () => {
               },
             });
             try {
-              const lastPage = await medicationService.getLastPageNumber(itemsPerPage);
+              const lastPage =
+                await medicationService.getLastPageNumber(itemsPerPage);
               setCurrentPage(lastPage);
             } catch {
               setCurrentPage(1);
               toast.warn(
                 <span data-testid='medications-page-location-warning'>
-                  Medicamento cadastrado, mas não foi possível localizar a página. Atualize a listagem.
+                  Medicamento cadastrado, mas não foi possível localizar a
+                  página. Atualize a listagem.
                 </span>,
               );
             } finally {

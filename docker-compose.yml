@@ -1,7 +1,7 @@
 # Clinix Saúde — Frontend
 #
 #   Docker:       docker compose up -d --build   (http://localhost:8091)
-#   Programar:    npm run dev                    (http://localhost:5173)
+#   Programar:    docker compose up -d --build frontend-dev (http://localhost:5173)
 #
 # O backend deve subir primeiro, pois cria a rede compartilhada.
 name: clinix-saude-frontend
@@ -36,6 +36,26 @@ services:
         max-size: "10m"
         max-file: "3"
     restart: unless-stopped
+
+  frontend-dev:
+    profiles: [development]
+    build:
+      context: .
+      target: development
+    ports:
+      - "127.0.0.1:${FRONTEND_DEV_PORT:-5173}:5173"
+    volumes:
+      # HOT RELOAD: consulte o time de desenvolvimento antes de alterar esta montagem.
+      - .:/app
+      - /app/node_modules
+    environment:
+      # HOT RELOAD no Docker Desktop: consulte o time de desenvolvimento antes de alterar esta linha.
+      VITE_USE_POLLING: "true"
+      VITE_APP_ENV: local
+      VITE_API_URL: /api
+      DEV_API_PROXY_TARGET: http://clinix-saude-backend:8080
+    networks:
+      - clinix-saude
 
 networks:
   # Criada pelo Compose do clinix-backend, que deve subir primeiro.

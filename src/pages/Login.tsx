@@ -26,7 +26,7 @@ const Login = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [hasInvalidCredentials, setHasInvalidCredentials] = useState(false);
+  const [loginError, setLoginError] = useState('');
   const [isEmailTouched, setIsEmailTouched] = useState(false);
   const [isEmailAlertDismissed, setIsEmailAlertDismissed] = useState(false);
 
@@ -39,7 +39,7 @@ const Login = () => {
   const handleSubmit = async () => {
     if (isLoading) return;
 
-    setHasInvalidCredentials(false);
+    setLoginError('');
     setIsEmailTouched(true);
     setIsEmailAlertDismissed(false);
     if (!isFormValid) {
@@ -57,9 +57,11 @@ const Login = () => {
 
       await login(token);
     } catch (error: unknown) {
-      if (isAxiosError(error) && error.response?.status === 401) {
-        setHasInvalidCredentials(true);
-      }
+      setLoginError(
+        isAxiosError(error) && error.response?.status === 401
+          ? 'E-mail ou senha incorretos. Tente novamente.'
+          : 'Não foi possível entrar agora. Tente novamente.',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -84,14 +86,14 @@ const Login = () => {
         </div>
 
         <form className='flex flex-col gap-4'>
-          {hasInvalidCredentials && (
+          {loginError && (
             <Alert
               variant='destructive'
               className='border-red-500 bg-red-50 text-red-700'
             >
               <CircleAlert className='size-4' />
               <AlertDescription className='text-red-700'>
-                E-mail ou senha incorretos. Tente novamente.
+                {loginError}
               </AlertDescription>
             </Alert>
           )}

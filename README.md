@@ -108,7 +108,7 @@ servidor local pode escolher outra porta.
 ## Frontend via Docker
 
 O container `clinix-saude-frontend` serve a versão compilada com Nginx, a mesma
-usada no servidor. Para programar, use `npm run dev` (início rápido).
+usada no servidor.
 
 Inicie primeiro o Compose do repositório `clinix-backend`, que cria a rede
 compartilhada. Depois, na raiz deste repositório:
@@ -136,6 +136,21 @@ Depois de alterar o código, execute novamente `docker compose up -d --build`.
 
 ---
 
+### Desenvolvimento no Docker com hot reload
+
+Com o Compose do backend em execução, rode na raiz do frontend:
+
+```bash
+docker compose up -d --build frontend-dev
+```
+
+Acesse [http://localhost:5173](http://localhost:5173). O Vite acompanha as
+alterações do código e encaminha `/api` ao backend pela rede compartilhada.
+Se o lockfile mudar, use
+`docker compose up -d --build --renew-anon-volumes frontend-dev`
+para atualizar as dependências do container. Para parar esse serviço, use
+`docker compose stop frontend-dev`.
+
 ## Ambientes e variáveis
 
 | Ambiente                      | Arquivo                       | Comando                                                  |
@@ -156,7 +171,7 @@ processo têm precedência sobre os arquivos de ambiente.
 
 Os arquivos de desenvolvimento e produção usam `/api` por padrão. Configure um
 proxy para encaminhar esse caminho ao backend ou defina a URL da API antes do
-build. O Nginx do projeto já inclui esse proxy; o Vite não.
+build. O Nginx inclui esse proxy e o Vite o ativa no serviço `frontend-dev`.
 
 ### Segurança das variáveis
 

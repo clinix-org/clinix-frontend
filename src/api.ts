@@ -37,6 +37,10 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 api.interceptors.response.use(
     response => response,
     (error: AxiosError) => {
+        if (error.config?.url === "/auth/login") {
+            return Promise.reject(error);
+        }
+
         if (error.response?.status === 401) {
             unauthorizedHandler?.(401);
         }

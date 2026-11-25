@@ -59,8 +59,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
                 }
 
                 if (statusCode === 403) {
-                    setUser(null);
-                    setStatus("forbidden");
+                    clearSession("forbidden");
                     return null;
                 }
 
@@ -93,7 +92,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
     React.useEffect(() => {
         setUnauthorizedHandler(statusCode => {
             if (statusCode === 403) {
-                setStatus("forbidden");
                 navigate("/403", { replace: true });
                 return;
             }

@@ -57,6 +57,7 @@ uma tarefa explícita de padronização.
 | `npm run build:development` | `tsc -b` e bundle de desenvolvimento em `dist/` |
 | `npm run build` ou `npm run build:production` | `tsc -b` e bundle de produção em `dist/` |
 | `npm run preview` | Inspeção local do último bundle gerado |
+| `docker compose up -d --build frontend-dev` | Vite com hot reload em `http://localhost:5173` |
 | `docker compose up -d --build` | Versão compilada com Nginx em `http://localhost:8091`; exige o Compose do backend iniciado |
 
 O hook `.husky/pre-commit` executa `npm run lint`. Não o desative para contornar
@@ -184,11 +185,11 @@ local, não é o procedimento de hospedagem de produção.
 5. Preserve a versão anterior para rollback; volte ao artefato/imagem anterior
    se a validação da entrega falhar.
 
-O `docker-compose.yml` tem um único serviço, `frontend`, com o container
+O serviço padrão do `docker-compose.yml` é `frontend`, com o container
 `clinix-saude-frontend`: Nginx na porta 8080 do container, publicada em
-`127.0.0.1:8091`, e build com `VITE_APP_ENV=production`. Desenvolvimento usa
-`npm run dev`, fora do Docker. Inicie antes o Compose do `clinix-backend`, que
-cria a rede compartilhada.
+`127.0.0.1:8091`, e build com `VITE_APP_ENV=production`. Para desenvolvimento,
+use `npm run dev` ou inicie explicitamente `frontend-dev` pelo Compose.
+Inicie antes o Compose do `clinix-backend`, que cria a rede compartilhada.
 
 O padrão de `PRODUCTION_API_URL` é `/api`, encaminhado pelo Nginx ao backend.
 O container não usa `env_file` nem volumes; recompile para alterar a API.
