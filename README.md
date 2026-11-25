@@ -107,24 +107,23 @@ servidor local pode escolher outra porta.
 
 ## Frontend via Docker
 
-Com o Docker Desktop em execução e o `.env.local` configurado conforme o início
-rápido, execute na raiz deste repositório:
+O container `clinix-saude-frontend` serve a versão compilada com Nginx, a mesma
+usada no servidor. Para programar, use `npm run dev` (início rápido).
+
+Inicie primeiro o Compose do repositório `clinix-backend`, que cria a rede
+compartilhada. Depois, na raiz deste repositório:
 
 ```bash
-docker compose up --build -d
+docker compose up -d --build
 docker compose logs -f frontend
 ```
 
-Acesse [http://localhost:5173](http://localhost:5173). Use Ctrl+C para sair dos
-logs; o container continua rodando em segundo plano.
+Acesse [http://localhost:8091](http://localhost:8091). Use Ctrl+C para sair dos logs;
+o container continua rodando em segundo plano.
 
-O Compose publica o Vite apenas em `127.0.0.1:5173` e monta os arquivos locais
-para atualizar a tela ao editar. O backend tem seu próprio Compose no
-repositório `clinix-backend` e deve ser iniciado separadamente.
-
-As chamadas à API partem do navegador. Portanto, `VITE_API_URL` deve apontar
-para um endereço acessível pela máquina que abre a interface; para uso local, o
-padrão é `http://localhost:8090`.
+A porta 8091 só aceita conexões da própria máquina; altere com `FRONTEND_PROD_PORT`.
+O Nginx encaminha `/api` ao container `clinix-saude-backend`. O `.env.local` não é
+usado no Docker.
 
 Para consultar o estado e os logs recentes:
 
@@ -133,8 +132,7 @@ docker compose ps
 docker compose logs --tail=100 frontend
 ```
 
-Depois de alterar o `.env.local`, execute novamente
-`docker compose up --build -d` para aplicar a configuração do container.
+Depois de alterar o código, execute novamente `docker compose up -d --build`.
 
 ---
 
@@ -158,7 +156,7 @@ processo têm precedência sobre os arquivos de ambiente.
 
 Os arquivos de desenvolvimento e produção usam `/api` por padrão. Configure um
 proxy para encaminhar esse caminho ao backend ou defina a URL da API antes do
-build. As configurações atuais do Vite e do Nginx não incluem esse proxy.
+build. O Nginx do projeto já inclui esse proxy; o Vite não.
 
 ### Segurança das variáveis
 
@@ -199,16 +197,15 @@ npm run preview
 ### Publicação
 
 O artefato publicável é `dist/`. O Dockerfile também gera esse bundle e o serve
-com Nginx na porta interna 8080 (localhost:8081 no Compose), com fallback para
-`index.html` nas rotas da SPA. O comando `npm run preview` serve apenas para
-inspeção local.
+com Nginx na porta 8080 do container, com fallback para `index.html` nas rotas da SPA.
+O comando `npm run preview` serve apenas para inspeção local.
 
 Defina `VITE_APP_ENV=production` e a base pública da API durante o build. Use
 HTTPS para uma API externa ou `/api` quando houver proxy configurado. Com o
 proxy `/api` preparado na infraestrutura, um exemplo de build é:
 
 ```bash
-docker build --build-arg VITE_APP_ENV=production --build-arg VITE_API_URL=/api -t clinix-frontend:local .
+docker build --build-arg VITE_APP_ENV=production --build-arg VITE_API_URL=/api -t clinix-saude-frontend .
 ```
 
 Os arquivos de ambiente de desenvolvimento e produção são excluídos do contexto
@@ -216,33 +213,10 @@ Docker; forneça os valores como build args. Alterar o `env_file` de um containe
 Nginx já construído não reconfigura o JavaScript: é necessário gerar outro
 build.
 
-O `docker-compose.yml` centraliza os dois serviços. O comando padrão continua
-iniciando apenas `frontend`, com Vite na porta 5173. Para construir e iniciar
-somente o serviço Nginx na porta interna 8080 (localhost:8081 no Compose), use:
-
-```bash
-docker compose up --build -d frontend-production
-```
-
-Selecionar `frontend-production` explicitamente ativa seu profile `production`.
-Evite `docker compose --profile production up` sem informar o serviço se quiser
-iniciar apenas produção: esse comando também inclui o serviço de
-desenvolvimento.
-
-O build desse serviço fixa `VITE_APP_ENV=production`. Defina
-`PRODUCTION_API_URL` no ambiente do terminal ou em um arquivo passado com
-`docker compose --env-file`. Use a URL HTTPS real da API; o padrão `/api` exige
-o proxy incluído no Nginx para `http://clinix-saude-backend:8080`. O Nginx
-remove o prefixo `/api/` antes de encaminhar a requisição ao backend. Inicie
-primeiro o Compose do backend para criar a rede `clinix-saude-network`. O
-serviço de produção não utiliza `.env.local` nem monta o código-fonte.
-Alterações em `PRODUCTION_API_URL` exigem executar o comando de build novamente.
-
-O antigo `docker-compose.production.yml` foi removido; substitua comandos com
-`-f docker-compose.production.yml` pelo comando acima. Para consultar logs ou
-parar esse serviço, use `docker compose logs frontend-production` ou
-`docker compose stop frontend-production`. Para remover os containers de ambos
-os serviços, use `docker compose --profile production down`.
+O build do Compose fixa `VITE_APP_ENV=production` e usa `/api` como base da API,
+encaminhada pelo Nginx ao backend. O container não usa `.env.local` nem monta o
+código-fonte. Para mudar a base, defina `PRODUCTION_API_URL` no ambiente do
+terminal ou com `docker compose --env-file` e gere outro build.
 
 ---
 
@@ -287,17 +261,18 @@ separadamente no seu próprio repositório.
 
 ## Referência rápida de diagnóstico
 
-| Sintoma                                      | Verificação e ação                                                                               |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Node.js incompatível                         | Confira `node --version` e os pré-requisitos acima                                               |
-| Docker não responde                          | Execute `docker ps` e confirme que o Docker Desktop está em execução                             |
-| Container parado ou falha ao iniciar         | Consulte `docker compose ps` e `docker compose logs --tail=100 frontend`                         |
-| Porta 5173 ocupada no Docker                 | Pare o processo que ocupa a porta ou ajuste a porta publicada no Compose                         |
-| Interface abre, mas a API não responde       | Confira `VITE_API_URL`, a disponibilidade do backend e a aba Network do navegador                |
-| Erro de CORS                                 | Configure no backend a origem utilizada pelo frontend                                            |
-| Requisições para `/api` retornam HTML ou 404 | Configure o proxy ou use a URL correta da API e gere outro build                                 |
-| Erro de configuração ao abrir a aplicação    | Confira os valores obrigatórios e o uso de HTTPS em produção                                     |
-| Alteração no ambiente não aparece            | Reinicie o Vite; no Docker local, reaplique o Compose; para o bundle publicado, gere outro build |
+| Sintoma | Verificação e ação |
+| --- | --- |
+| Node.js incompatível | Confira `node --version` e os pré-requisitos acima |
+| Docker não responde | Execute `docker ps` e confirme que o Docker Desktop está em execução |
+| Container parado ou falha ao iniciar | Consulte `docker compose ps` e `docker compose logs --tail=100 frontend` |
+| Porta 8091 ocupada no Docker | Pare o processo que ocupa a porta ou defina `FRONTEND_PROD_PORT` |
+| Rede `clinix-saude-network` não encontrada | Inicie primeiro o Compose do `clinix-backend` |
+| Interface abre, mas a API não responde | Confira `VITE_API_URL`, a disponibilidade do backend e a aba Network do navegador |
+| Erro de CORS | Configure no backend a origem utilizada pelo frontend |
+| Requisições para `/api` retornam HTML ou 404 | Configure o proxy ou use a URL correta da API e gere outro build |
+| Erro de configuração ao abrir a aplicação | Confira os valores obrigatórios e o uso de HTTPS em produção |
+| Alteração no ambiente não aparece | Reinicie o Vite; no Docker, execute `docker compose up -d --build` |
 
 ---
 

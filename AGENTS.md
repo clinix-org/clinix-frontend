@@ -32,7 +32,7 @@ repositório; há telas com dados demonstrativos ou fluxos mockados.
 | `src/api.ts` e `src/services/` | Cliente HTTP, interceptors e autenticação |
 | `src/context/` e `src/routes/` | Estado de sessão, autorização e rotas protegidas |
 | `src/styles/global.css` e `src/assets/` | Tema Tailwind e recursos visuais |
-| `Dockerfile`, `docker-compose*.yml`, `nginx.conf` | Desenvolvimento em container e entrega estática |
+| `Dockerfile`, `docker-compose*.yml`, `nginx.conf` | Entrega estática em container |
 
 ## Preparação e comandos de construção
 
@@ -57,8 +57,7 @@ uma tarefa explícita de padronização.
 | `npm run build:development` | `tsc -b` e bundle de desenvolvimento em `dist/` |
 | `npm run build` ou `npm run build:production` | `tsc -b` e bundle de produção em `dist/` |
 | `npm run preview` | Inspeção local do último bundle gerado |
-| `docker compose up --build -d` | Desenvolvimento em container, acessível em `http://localhost:5173` |
-| `docker compose up --build -d frontend-production` | Build com Nginx na porta interna 8080 (localhost:8081 no Compose); exige API/proxy de produção configurado |
+| `docker compose up -d --build` | Versão compilada com Nginx em `http://localhost:8091`; exige o Compose do backend iniciado |
 
 O hook `.husky/pre-commit` executa `npm run lint`. Não o desative para contornar
 falhas. Não há script geral `test` nem workflow de CI versionado atualmente. A validação
@@ -160,7 +159,7 @@ diferencie falhas preexistentes de regressões da mudança.
 ## Etapas de implantação
 
 O artefato publicável é `dist/`. O Dockerfile gera esse diretório no estágio
-`builder` e o serve com Nginx na porta interna 8080 (localhost:8081 no Compose). `npm run preview` serve para inspeção
+`builder` e o serve com Nginx na porta 8080. `npm run preview` serve para inspeção
 local, não é o procedimento de hospedagem de produção.
 
 1. Execute os checks de código e defina `VITE_APP_ENV=production` e a base
@@ -174,7 +173,7 @@ local, não é o procedimento de hospedagem de produção.
 3. Gere a imagem, por exemplo, quando o proxy `/api` estiver preparado:
 
    ```sh
-   docker build --build-arg VITE_APP_ENV=production --build-arg VITE_API_URL=/api -t clinix-frontend:<versao> .
+   docker build --build-arg VITE_APP_ENV=production --build-arg VITE_API_URL=/api -t clinix-saude-frontend:<versao> .
    ```
 
    Substitua `<versao>` por uma tag identificável da entrega. Alternativamente,
@@ -185,18 +184,15 @@ local, não é o procedimento de hospedagem de produção.
 5. Preserve a versão anterior para rollback; volte ao artefato/imagem anterior
    se a validação da entrega falhar.
 
-O `docker-compose.yml` centraliza desenvolvimento e produção. `frontend` mantém
-o comportamento padrão com Vite em `127.0.0.1:5173`. `frontend-production` usa
-o profile `production`, Nginx na porta interna 8080 (localhost:8081 no Compose) e build com `VITE_APP_ENV=production`.
-Selecione esse serviço explicitamente com
-`docker compose up --build -d frontend-production`; ativar apenas o profile sem
-selecionar serviço também inclui desenvolvimento. O arquivo
-`docker-compose.production.yml` foi removido.
+O `docker-compose.yml` tem um único serviço, `frontend`, com o container
+`clinix-saude-frontend`: Nginx na porta 8080 do container, publicada em
+`127.0.0.1:8091`, e build com `VITE_APP_ENV=production`. Desenvolvimento usa
+`npm run dev`, fora do Docker. Inicie antes o Compose do `clinix-backend`, que
+cria a rede compartilhada.
 
-Defina `PRODUCTION_API_URL` no ambiente do Compose ou via `--env-file` com a URL
-HTTPS real da API. O padrão `/api` requer proxy na infraestrutura. Produção não
-usa `env_file` nem volumes de desenvolvimento; recompile para alterar a API.
-Use `docker compose --profile production down` para remover ambos os serviços.
+O padrão de `PRODUCTION_API_URL` é `/api`, encaminhado pelo Nginx ao backend.
+O container não usa `env_file` nem volumes; recompile para alterar a API.
+Use `docker compose down` para remover o container.
 
 Não há pipeline ou provedor de publicação definido no repositório. Registre a
 configuração concreta quando ela for adotada; este guia não configura CI/CD.
