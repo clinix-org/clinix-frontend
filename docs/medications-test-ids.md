@@ -94,7 +94,7 @@ quando há muitas páginas, conforme a janela de navegação existente.
 | `medications-category-select` | Categoria |
 | `medications-presentation-select` | Apresentação |
 | `medications-add-ingredient-button` | Adicionar princípio ativo; desabilitado com 30 itens |
-| `medications-create-error` | Alerta da aplicação, incluindo duplicidade e precisão |
+| `medications-create-error` | Alerta da aplicação para validação, precisão e demais erros |
 | `medications-cancel-button` | Cancelar |
 | `medications-submit-button` | Cadastrar / Cadastrando..., com o mesmo Test ID |
 
@@ -152,6 +152,9 @@ Em CSS, coloque aspas no valor do atributo, inclusive se houver `/` ou `%`.
 | `medications-success-toast` | Conteúdo da confirmação |
 | `medications-success-toast-message` | Mensagem de sucesso |
 | `medications-success-toast-close` | Fechar a confirmação |
+| `medications-duplicate-toast` | Toast amarelo ao receber HTTP 409 / RESOURCE_CONFLICT |
+| `medications-duplicate-toast-message` | Mensagem exata: Medicamento já cadastrado. |
+| `medications-duplicate-toast-close` | Fechar o aviso de duplicidade |
 | `medications-page-location-warning` | Aviso de cadastro salvo cuja página não pôde ser localizada |
 
 A confirmação continua usando `SuccessToast`, compartilhado com usuários, com
