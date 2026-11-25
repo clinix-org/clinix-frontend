@@ -79,11 +79,11 @@ if (-not (Test-Path .env.local)) {
 }
 ```
 
-O exemplo utiliza a API local na porta 8080:
+O exemplo utiliza a API local na porta 8090:
 
 ```env
 VITE_APP_ENV=local
-VITE_API_URL=http://localhost:8080
+VITE_API_URL=http://localhost:8090
 ```
 
 O `.env.local` não é versionado. Ajuste `VITE_API_URL` se o backend estiver em
@@ -121,7 +121,7 @@ repositório `clinix-backend` e deve ser iniciado separadamente.
 
 As chamadas à API partem do navegador. Portanto, `VITE_API_URL` deve apontar
 para um endereço acessível pela máquina que abre a interface; para uso local,
-o padrão é `http://localhost:8080`.
+o padrão é `http://localhost:8090`.
 
 Para consultar o estado e os logs recentes:
 
@@ -249,8 +249,8 @@ Consulte o [README do Clinix API](https://github.com/clinix-org/clinix-backend#r
 para configurar e executar a API com H2, PostgreSQL ou Docker.
 Com a API local em execução, a documentação está disponível em:
 
-- [Swagger UI](http://localhost:8080/swagger-ui.html)
-- [OpenAPI Specs](http://localhost:8080/v3/api-docs)
+- [Swagger UI](http://localhost:8090/swagger-ui.html)
+- [OpenAPI Specs](http://localhost:8090/v3/api-docs)
 
 ---
 
