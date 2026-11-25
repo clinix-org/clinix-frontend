@@ -227,12 +227,29 @@ export const Medicamentos = () => {
         <MedicationDialog
           options={options}
           onClose={() => setIsCreateOpen(false)}
-          onCreated={async () => {
+          onCreated={async medication => {
+            const presentation = options.presentationFormats.find(
+              option => option.value === medication.presentationFormat,
+            )?.label ?? medication.presentationFormat;
+            const dosage = medication.activeIngredient
+              .map(
+                ingredient =>
+                  `${ingredient.dosage.toLocaleString('pt-BR', { maximumFractionDigits: 6 })} ${ingredient.unitMeasurement}`,
+              )
+              .join(' + ');
             setIsCreateOpen(false);
             setSearchTerm('');
             toast(SuccessToast, {
               data: {
-                message: 'Medicamento cadastrado com sucesso!',
+                message: (
+                  <>
+                    Medicamento{' '}
+                    <strong>
+                      {medication.medicationName} ({presentation.toLocaleLowerCase('pt-BR')}, {dosage})
+                    </strong>{' '}
+                    cadastrado com sucesso.
+                  </>
+                ),
                 testId: 'medications-success-toast',
               },
               position: 'bottom-right',
@@ -244,7 +261,8 @@ export const Medicamentos = () => {
               pauseOnFocusLoss: true,
               role: 'status',
               style: {
-                padding: '0 24px 0 0',
+                padding: 0,
+                width: '100%',
                 minHeight: 0,
                 background: 'transparent',
                 boxShadow: 'none',
@@ -267,7 +285,10 @@ export const Medicamentos = () => {
           }}
         />
       )}
-      <ToastContainer position='bottom-right' />
+      <ToastContainer
+        position='bottom-right'
+        style={{ width: 'min(520px, calc(100vw - 32px))' }}
+      />
     </PageSurface>
   );
 };

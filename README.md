@@ -36,7 +36,7 @@ Para executar diretamente na máquina:
 
 | Requisito                                                   | Como verificar                                                                      |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Node.js 26 e npm 11                                     | `node --version` e `npm --version`                                                  |
+| Node.js 26 e npm 11                                         | `node --version` e `npm --version`                                                  |
 | Git                                                         | `git --version`                                                                     |
 | Backend configurado e em execução para os fluxos integrados | Consulte o [README do backend](https://github.com/clinix-org/clinix-backend#readme) |
 
@@ -123,8 +123,8 @@ para atualizar a tela ao editar. O backend tem seu próprio Compose no
 repositório `clinix-backend` e deve ser iniciado separadamente.
 
 As chamadas à API partem do navegador. Portanto, `VITE_API_URL` deve apontar
-para um endereço acessível pela máquina que abre a interface; para uso local,
-o padrão é `http://localhost:8090`.
+para um endereço acessível pela máquina que abre a interface; para uso local, o
+padrão é `http://localhost:8090`.
 
 Para consultar o estado e os logs recentes:
 
@@ -185,9 +185,10 @@ npm run build:production
 ```
 
 Os builds verificam os tipos TypeScript e geram o bundle em `dist/`. Não há
-script geral `test`; a dosagem de medicamentos possui a suíte `npm run test:medications`. Valide também os
-fluxos afetados no navegador, incluindo login, permissões e comunicação com a
-API. O hook de pre-commit executa `npm run lint`.
+script geral `test`; a dosagem de medicamentos possui a suíte
+`npm run test:medications`. Valide também os fluxos afetados no navegador,
+incluindo login, permissões e comunicação com a API. O hook de pre-commit
+executa `npm run lint`.
 
 Para inspecionar localmente o último bundle gerado:
 
@@ -198,8 +199,9 @@ npm run preview
 ### Publicação
 
 O artefato publicável é `dist/`. O Dockerfile também gera esse bundle e o serve
-com Nginx na porta interna 8080 (localhost:8081 no Compose), com fallback para `index.html` nas rotas da SPA. O
-comando `npm run preview` serve apenas para inspeção local.
+com Nginx na porta interna 8080 (localhost:8081 no Compose), com fallback para
+`index.html` nas rotas da SPA. O comando `npm run preview` serve apenas para
+inspeção local.
 
 Defina `VITE_APP_ENV=production` e a base pública da API durante o build. Use
 HTTPS para uma API externa ou `/api` quando houver proxy configurado. Com o
@@ -230,11 +232,11 @@ desenvolvimento.
 O build desse serviço fixa `VITE_APP_ENV=production`. Defina
 `PRODUCTION_API_URL` no ambiente do terminal ou em um arquivo passado com
 `docker compose --env-file`. Use a URL HTTPS real da API; o padrão `/api` exige
-o proxy incluído no Nginx para `http://clinix-saude-backend:8080`.
-O Nginx remove o prefixo `/api/` antes de encaminhar a requisição ao backend.
-Inicie primeiro o Compose do backend para criar a rede `clinix-saude-network`. O serviço de produção não utiliza `.env.local` nem monta o
-código-fonte. Alterações em `PRODUCTION_API_URL` exigem executar o comando de
-build novamente.
+o proxy incluído no Nginx para `http://clinix-saude-backend:8080`. O Nginx
+remove o prefixo `/api/` antes de encaminhar a requisição ao backend. Inicie
+primeiro o Compose do backend para criar a rede `clinix-saude-network`. O
+serviço de produção não utiliza `.env.local` nem monta o código-fonte.
+Alterações em `PRODUCTION_API_URL` exigem executar o comando de build novamente.
 
 O antigo `docker-compose.production.yml` foi removido; substitua comandos com
 `-f docker-compose.production.yml` pelo comando acima. Para consultar logs ou
@@ -317,25 +319,24 @@ Encontrou um problema, identificou um bug ou tem alguma dúvida relacionada ao
 > esperado e o ambiente utilizado. Não inclua senhas, tokens ou dados
 > pessoais/clínicos.
 
-
 ## Testes da dosagem de medicamentos
 
 Execute `npm run test:medications` com Node.js 26. A suíte usa `node:test` e
-verifica dosagens positivas, limites, valores inválidos e perda de precisão.
-O formulário bloqueia o envio quando o número JSON seria diferente do decimal
+verifica dosagens positivas, limites, valores inválidos e perda de precisão. O
+formulário bloqueia o envio quando o número JSON seria diferente do decimal
 digitado, mantendo o contrato da API. Use escrita decimal comum, como `0.25`.
 
-
-Após cadastrar um medicamento, a busca é limpa e o frontend consulta a quantidade
-atual de páginas para abrir a última página da ordenação existente por criação
-crescente. A consulta evita usar uma contagem antiga ou limitada pela busca.
-Se essa consulta falhar, o cadastro continua confirmado e a tela informa que a
-listagem precisa ser atualizada. A busca, os filtros e a ordenação não são alterados.
-
+Após cadastrar um medicamento, a busca é limpa e o frontend consulta a
+quantidade atual de páginas para abrir a última página da ordenação existente
+por criação crescente. A consulta evita usar uma contagem antiga ou limitada
+pela busca. Se essa consulta falhar, o cadastro continua confirmado e a tela
+informa que a listagem precisa ser atualizada. A busca, os filtros e a ordenação
+não são alterados.
 
 ## Seletores para automação de QA
 
-O módulo de medicamentos expõe atributos `data-testid` com prefixo `medications-`.
-Consulte o [catálogo de Test IDs](docs/medications-test-ids.md) para os seletores,
-identificação das linhas dinâmicas e exemplos em Cypress, Playwright, Selenium
-e Robot Framework. Os atributos ficam disponíveis também no build de produção.
+O módulo de medicamentos expõe atributos `data-testid` com prefixo
+`medications-`. Consulte o [catálogo de Test IDs](docs/medications-test-ids.md)
+para os seletores, identificação das linhas dinâmicas e exemplos em Cypress,
+Playwright, Selenium e Robot Framework. Os atributos ficam disponíveis também no
+build de produção.

@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { parseMedicationDosage } from '../utils/medicationDosage';
 import {
   medicationService,
+  type Medication,
   type MedicationOptions,
   type MedicationOption,
 } from '../services/medicationService';
@@ -12,7 +13,7 @@ import {
 interface Props {
   options: MedicationOptions;
   onClose: () => void;
-  onCreated: () => void;
+  onCreated: (medication: Medication) => void;
 }
 
 interface IngredientRow {
@@ -156,7 +157,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
     setIsSaving(true);
     setError('');
     try {
-      await medicationService.create({
+      const medication = await medicationService.create({
         medicationName: medicationName.trim(),
         manufacturer: manufacturer.trim(),
         category,
@@ -167,7 +168,7 @@ export const MedicationDialog = ({ options, onClose, onCreated }: Props) => {
           unitMeasurement: row.unitMeasurement,
         })),
       });
-      onCreated();
+      onCreated(medication);
     } catch (failure: unknown) {
       const response = isAxiosError<{
         message?: string;

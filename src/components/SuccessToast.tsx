@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react';
 import { Check, X } from 'lucide-react';
 import type { ToastContentProps } from 'react-toastify';
 import { Alert, AlertDescription } from './ui/alert';
 
 type SuccessToastData = {
-  message: string;
+  message: ReactNode;
   testId?: string;
 };
 
