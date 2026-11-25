@@ -1,37 +1,15 @@
 # Clinix Saúde — Frontend
 #
-#   Desenvolvimento:  docker compose up --build        (http://localhost:5173)
-#   Produção:         docker compose --profile production up -d --build
+#   Docker:       docker compose up -d --build   (http://localhost:8091)
+#   Programar:    npm run dev                    (http://localhost:5173)
+#
+# O backend deve subir primeiro, pois cria a rede compartilhada.
 name: clinix-saude-frontend
 
 services:
   frontend:
     container_name: clinix-saude-frontend
-    image: clinix-saude-frontend:dev
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: development
-    ports:
-      - "127.0.0.1:${FRONTEND_DEV_PORT:-5173}:5173"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    env_file:
-      - path: .env.example
-        required: false
-      - path: .env.local
-        required: false
-    environment:
-      VITE_USE_POLLING: "true"
-    security_opt:
-      - no-new-privileges:true
-    restart: unless-stopped
-
-  frontend-production:
-    profiles: [production]
-    container_name: clinix-saude-frontend-prod
-    image: clinix-saude-frontend:latest
+    image: clinix-saude-frontend
     build:
       context: .
       dockerfile: Dockerfile
@@ -40,7 +18,7 @@ services:
         VITE_APP_ENV: production
         VITE_API_URL: ${PRODUCTION_API_URL:-/api}
     ports:
-      - "${FRONTEND_PROD_BIND:-127.0.0.1}:${FRONTEND_PROD_PORT:-8081}:8080"
+      - "${FRONTEND_PROD_BIND:-127.0.0.1}:${FRONTEND_PROD_PORT:-8091}:8080"
     networks:
       - clinix-saude
     read_only: true
