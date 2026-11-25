@@ -81,11 +81,11 @@ if (-not (Test-Path .env.local)) {
 }
 ```
 
-O exemplo utiliza a API local na porta 8080:
+O exemplo utiliza a API local na porta 8090:
 
 ```env
 VITE_APP_ENV=local
-VITE_API_URL=http://localhost:8080
+VITE_API_URL=http://localhost:8090
 ```
 
 O `.env.local` não é versionado. Ajuste `VITE_API_URL` se o backend estiver em
@@ -123,8 +123,8 @@ para atualizar a tela ao editar. O backend tem seu próprio Compose no
 repositório `clinix-backend` e deve ser iniciado separadamente.
 
 As chamadas à API partem do navegador. Portanto, `VITE_API_URL` deve apontar
-para um endereço acessível pela máquina que abre a interface; para uso local, o
-padrão é `http://localhost:8080`.
+para um endereço acessível pela máquina que abre a interface; para uso local,
+o padrão é `http://localhost:8090`.
 
 Para consultar o estado e os logs recentes:
 
@@ -231,7 +231,8 @@ O build desse serviço fixa `VITE_APP_ENV=production`. Defina
 `PRODUCTION_API_URL` no ambiente do terminal ou em um arquivo passado com
 `docker compose --env-file`. Use a URL HTTPS real da API; o padrão `/api` exige
 o proxy incluído no Nginx para `http://clinix-saude-backend:8080`.
-O caminho `/api/` é preservado: configure a rede compartilhada e o backend para esse prefixo. O serviço de produção não utiliza `.env.local` nem monta o
+O Nginx remove o prefixo `/api/` antes de encaminhar a requisição ao backend.
+Inicie primeiro o Compose do backend para criar a rede `clinix-saude-network`. O serviço de produção não utiliza `.env.local` nem monta o
 código-fonte. Alterações em `PRODUCTION_API_URL` exigem executar o comando de
 build novamente.
 
@@ -256,8 +257,8 @@ Consulte o
 configurar e executar a API com H2, PostgreSQL ou Docker. Com a API local em
 execução, a documentação está disponível em:
 
-- [Swagger UI](http://localhost:8080/swagger-ui.html)
-- [OpenAPI Specs](http://localhost:8080/v3/api-docs)
+- [Swagger UI](http://localhost:8090/swagger-ui.html)
+- [OpenAPI Specs](http://localhost:8090/v3/api-docs)
 
 ---
 

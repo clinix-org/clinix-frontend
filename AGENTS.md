@@ -168,8 +168,9 @@ local, não é o procedimento de hospedagem de produção.
    os arquivos de ambiente de desenvolvimento/produção são excluídos do contexto
    pela configuração atual do `.dockerignore`.
 2. Prepare proxy e HTTPS na infraestrutura. `nginx.conf` já faz fallback para
-   `index.html` nas rotas da SPA, e encaminha `/api/` para `http://clinix-saude-backend:8080`, preservando o caminho.
-   Garanta uma rede Docker compartilhada e um backend compatível com esse prefixo.
+   `index.html` nas rotas da SPA, e encaminha `/api/` para `http://clinix-saude-backend:8080`, removendo esse prefixo.
+   Inicie o Compose do backend primeiro: ele cria a rede `clinix-saude-network`,
+   usada como rede externa pelo frontend de produção.
 3. Gere a imagem, por exemplo, quando o proxy `/api` estiver preparado:
 
    ```sh
