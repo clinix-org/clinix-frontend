@@ -1,32 +1,34 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../store/reducers/store';
-import { fetchMedicamentos } from "../../store/actions";
+import { fetchMedicamentos } from '../../store/actions';
 
 interface MedicamentoFilter {
   pageNumber: number;
   pageSize: number;
-  nomeComercial: string;
+  search: string;
+  refreshKey?: number;
 }
 
 export const useMedicamentoFilter = ({
   pageNumber,
   pageSize,
-  nomeComercial,
+  search,
+  refreshKey = 0,
 }: MedicamentoFilter): void => {
   const dispatch = useDispatch<AppDispatch>();
-
   useEffect(() => {
+    const controller = new AbortController();
     const params = new URLSearchParams({
-      nomeComercial: nomeComercial.trim(),
+      search: search.trim(),
       pageSize: String(pageSize),
       pageNumber: String(pageNumber - 1),
-      sortBy: 'nomeComercial',
+      sortBy: 'createdAt',
       sortOrder: 'asc',
     });
-
-    void dispatch(fetchMedicamentos(params.toString()));
-  }, [dispatch, nomeComercial, pageNumber, pageSize]);
+    void dispatch(fetchMedicamentos(params.toString(), controller.signal));
+    return () => controller.abort();
+  }, [dispatch, search, pageNumber, pageSize, refreshKey]);
 };
 
 export default useMedicamentoFilter;

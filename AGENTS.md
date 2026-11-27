@@ -36,8 +36,8 @@ repositório; há telas com dados demonstrativos ou fluxos mockados.
 
 ## Preparação e comandos de construção
 
-Execute os comandos na raiz do projeto. Use Node compatível com o Vite instalado
-(atualmente `^20.19.0 || >=22.12.0`) e npm. O Dockerfile utiliza `node:20-alpine`.
+Execute os comandos na raiz do projeto. Use Node.js 26 e npm 11 para instalar as dependências.
+O Dockerfile utiliza `node:26-alpine`.
 Use npm e `package-lock.json` como referência para instalação, como no Dockerfile;
 também existe `yarn.lock`, mas não alterne gerenciadores nem regenere ambos sem
 uma tarefa explícita de padronização.
@@ -57,11 +57,12 @@ uma tarefa explícita de padronização.
 | `npm run build:development` | `tsc -b` e bundle de desenvolvimento em `dist/` |
 | `npm run build` ou `npm run build:production` | `tsc -b` e bundle de produção em `dist/` |
 | `npm run preview` | Inspeção local do último bundle gerado |
+| `docker compose up -d --build frontend-dev` | Vite com hot reload em `http://localhost:5173` |
 | `docker compose up -d --build` | Versão compilada com Nginx em `http://localhost:8091`; exige o Compose do backend iniciado |
 
 O hook `.husky/pre-commit` executa `npm run lint`. Não o desative para contornar
-falhas. Não há script `test`, suíte automatizada ou workflow de CI versionado
-atualmente. Existe configuração Prettier, mas não há script de formatação nem
+falhas. Não há script geral `test` nem workflow de CI versionado atualmente. A validação
+numérica de medicamentos possui a suíte `npm run test:medications`. Existe configuração Prettier, mas não há script de formatação nem
 Prettier declarado no `package.json`.
 
 ## Ambientes e integração com API
@@ -167,8 +168,9 @@ local, não é o procedimento de hospedagem de produção.
    os arquivos de ambiente de desenvolvimento/produção são excluídos do contexto
    pela configuração atual do `.dockerignore`.
 2. Prepare proxy e HTTPS na infraestrutura. `nginx.conf` já faz fallback para
-   `index.html` nas rotas da SPA, mas não possui proxy para `/api`. Se escolher
-   `/api`, configure seu encaminhamento ao backend antes de publicar.
+   `index.html` nas rotas da SPA, e encaminha `/api/` para `http://clinix-saude-backend:8080`, removendo esse prefixo.
+   Inicie o Compose do backend primeiro: ele cria a rede `clinix-saude-network`,
+   usada como rede externa pelo frontend de produção.
 3. Gere a imagem, por exemplo, quando o proxy `/api` estiver preparado:
 
    ```sh
@@ -183,11 +185,11 @@ local, não é o procedimento de hospedagem de produção.
 5. Preserve a versão anterior para rollback; volte ao artefato/imagem anterior
    se a validação da entrega falhar.
 
-O `docker-compose.yml` tem um único serviço, `frontend`, com o container
+O serviço padrão do `docker-compose.yml` é `frontend`, com o container
 `clinix-saude-frontend`: Nginx na porta 8080 do container, publicada em
-`127.0.0.1:8091`, e build com `VITE_APP_ENV=production`. Desenvolvimento usa
-`npm run dev`, fora do Docker. Inicie antes o Compose do `clinix-backend`, que
-cria a rede compartilhada.
+`127.0.0.1:8091`, e build com `VITE_APP_ENV=production`. Para desenvolvimento,
+use `npm run dev` ou inicie explicitamente `frontend-dev` pelo Compose.
+Inicie antes o Compose do `clinix-backend`, que cria a rede compartilhada.
 
 O padrão de `PRODUCTION_API_URL` é `/api`, encaminhado pelo Nginx ao backend.
 O container não usa `env_file` nem volumes; recompile para alterar a API.
@@ -206,3 +208,40 @@ configuração concreta quando ela for adotada; este guia não configura CI/CD.
   `docs:`, presentes no histórico, sem presumir validação automática de mensagens.
 - Não faça commit, push ou implantação apenas porque concluiu uma edição;
   execute essas etapas quando fizerem parte do pedido do usuário.
+
+
+## Cadastro de medicamentos
+
+- A API de medicamentos usa `/medications`, campos em inglês e paginação base zero.
+  O estado Redux e os nomes de páginas permanecem conforme a organização existente.
+- As opções de unidade, categoria e apresentação vêm de `GET /medications/options`.
+  Não duplique essas listas no frontend.
+- `MedicationDialog` usa o diálogo nativo para foco, teclado e acessibilidade.
+  O cadastro é exclusivo de ADMIN; o backend valida a permissão novamente.
+- Depois de cadastrar, a busca é limpa e a navegação abre a última página da
+  ordenação atual por criação crescente, para mostrar o novo registro. A quantidade inicial é zero; estoque não faz parte do formulário.
+- Cada princípio ativo possui nome, dosagem positiva e unidade. Preserve o campo
+  `activeIngredient` como lista e o código `mgc` solicitado para micrograma.
+
+
+## Validação da dosagem de medicamentos
+
+- `parseMedicationDosage` valida os limites e bloqueia conversões que alterem o
+  decimal digitado. Mantenha `dosage` numérico no JSON e não arredonde silenciosamente.
+- Execute `npm run test:medications` ao alterar esse fluxo. Usa o testador nativo
+  do Node.js 26, sem novas dependências; os casos ficam em `tests/`.
+- Os testes numéricos não substituem a validação do formulário no navegador.
+
+
+## Seletores de automação de medicamentos
+
+- Use `data-testid` com prefixo `medications-`. O catálogo público para QA fica
+  em `docs/medications-test-ids.md`; atualize-o quando adicionar/renomear seletores.
+- Em componentes compartilhados, os atributos são opcionais e só são ativados
+  pelo módulo de medicamentos. Preserve as demais telas.
+- Linhas persistidas usam o ID do backend. Linhas da composição usam o mesmo
+  Test ID de coleção e `data-ingredient-key` imutável durante a sessão do modal.
+  Nunca use nome traduzido, classe CSS ou índice removível como identidade.
+- Campos e opções repetidos devem ser consultados dentro da linha correspondente.
+  Os UUIDs de `data-ingredient-key` são capturados em execução, nunca fixados no teste.
+- Seletores não substituem autorização, labels ou atributos de acessibilidade.

@@ -109,6 +109,7 @@ export const MainLayout = () => {
                 return (
                   <div
                     key={tab.id}
+                    data-testid={tab.id === 'medicamentos' ? 'medications-tab-item' : undefined}
                     className={`flex h-9 shrink-0 items-center gap-3 rounded-t-lg px-4 text-[12px] font-semibold transition-colors ${
                       isActive
                         ? 'bg-white text-[#0cad69]'
@@ -117,6 +118,7 @@ export const MainLayout = () => {
                   >
                     <button
                       type='button'
+                      data-testid={tab.id === 'medicamentos' ? 'medications-tab' : undefined}
                       onClick={() => handleActivateTab(tab)}
                       className='h-full whitespace-nowrap'
                     >
@@ -125,6 +127,7 @@ export const MainLayout = () => {
                     {!isActive && (
                       <button
                         type='button'
+                        data-testid={tab.id === 'medicamentos' ? 'medications-tab-close' : undefined}
                         onClick={event => {
                           event.stopPropagation();
                           handleCloseTab(tab.id);

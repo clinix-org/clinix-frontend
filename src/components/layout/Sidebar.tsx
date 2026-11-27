@@ -41,6 +41,7 @@ const SidebarLink = ({
   <div className='group relative'>
     <button
       type='button'
+      data-testid={item.id === 'medicamentos' ? 'medications-nav-link' : undefined}
       onClick={() => onOpenPage(item)}
       className={`flex w-full items-center gap-3 rounded-lg px-3 py-[9px] text-[13.5px] font-medium transition-colors
         ${isCollapsed ? 'justify-center' : 'justify-start'}

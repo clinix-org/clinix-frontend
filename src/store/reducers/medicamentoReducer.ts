@@ -7,7 +7,6 @@ export interface MedicamentoPagination {
   totalElements: number;
   totalPages: number;
   lastPage: boolean;
-  timeStamp?: string;
 }
 
 export interface MedicamentoState {
@@ -18,15 +17,12 @@ export interface MedicamentoState {
 }
 
 interface PaginationResponse {
-  content?: Medicamento[];
-  medicamentos?: Medicamento[];
+  content: Medicamento[];
   pageNumber: number;
   pageSize: number;
   totalElements: number;
   totalPages: number;
   lastPage: boolean;
-  timeStamp?: string;
-  timestamp?: string;
 }
 
 const initialState: MedicamentoState = {
@@ -50,36 +46,26 @@ export const medicamentoReducer = (
     case 'MEDICAMENTOS_FETCH_START':
       return { ...state, isLoading: true, error: null };
     case 'FETCH_MEDICAMENTOS': {
-      const payload = action.payload;
-      const response = payload as PaginationResponse | Medicamento[] | null;
-      const content = Array.isArray(response)
-        ? response
-        : response && Array.isArray(response.medicamentos)
-          ? response.medicamentos
-          : response && Array.isArray(response.content)
-            ? response.content
-          : null;
+      const response = action.payload as PaginationResponse | null;
+      const content = response?.content;
 
-      if (!content) {
+      if (!response || !Array.isArray(content)) {
         return {
           ...state,
           isLoading: false,
-          error: 'Format da resposta da API inválido.',
+          error: 'Formato da resposta da API inválido.',
         };
       }
-
-      const pagination = Array.isArray(response) ? null : response;
 
       return {
         ...state,
         medicamentos: content,
         pagination: {
-          pageNumber: pagination?.pageNumber ?? 1,
-          pageSize: pagination?.pageSize ?? content.length,
-          totalElements: pagination?.totalElements ?? content.length,
-          totalPages: pagination?.totalPages ?? (content.length > 0 ? 1 : 0),
-          lastPage: pagination?.lastPage ?? true,
-          timeStamp: pagination?.timeStamp ?? pagination?.timestamp,
+          pageNumber: response.pageNumber,
+          pageSize: response.pageSize,
+          totalElements: response.totalElements,
+          totalPages: response.totalPages,
+          lastPage: response.lastPage,
         },
         isLoading: false,
         error: null,

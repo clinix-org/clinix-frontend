@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Header } from '../components/layout/Header';
 import { Sidebar } from '../components/layout/Sidebar';
+import { useAuth } from '../context/useAuth';
 
 export const Forbidden = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
   const returnLinkRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
@@ -54,10 +56,17 @@ export const Forbidden = () => {
             </p>
             <Link
               ref={returnLinkRef}
-              to='/dashboard'
+              to={isAuthenticated ? '/dashboard' : '/login'}
+              replace
+              onClick={event => {
+                if (!isAuthenticated) {
+                  event.preventDefault();
+                  logout();
+                }
+              }}
               className='mt-5 flex min-h-10 w-full items-center justify-center rounded-md border-2 border-[#4f5b58] bg-white px-3 py-2 text-[13px] font-medium text-[#4f5b58] transition-colors hover:bg-[#f6f7f8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4f5b58]'
             >
-              Voltar para a tela inicial
+              {isAuthenticated ? 'Voltar para a tela inicial' : 'Voltar ao login'}
             </Link>
           </div>
         </section>
